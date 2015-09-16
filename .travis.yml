@@ -1,0 +1,22 @@
+language: c
+compiler:
+  - gcc
+  - clang
+os:
+  - linux
+  #- osx
+env:
+  - BOP_GroupSize=2
+  - BOP_GroupSize=4
+matrix:
+  fast_finish: true
+
+sudo: false
+addons:
+  apt:
+    packages:
+    - gcc
+    - clang
+
+script:
+  - make && make test

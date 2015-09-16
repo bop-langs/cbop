@@ -38,6 +38,9 @@ else
  	CFLAGS = $(CFLAGS_DEF) $(OPITIMIZEFLAGS)
 endif
 
+TEST_DIRS = add sleep
+#TODO enable string tests, str/BOP_string str/strsub str/strsub2
+
 library: print_info $(LIB_SO) # $(HEADERS)
 
 print_info:
@@ -46,6 +49,15 @@ print_info:
 	@echo CFLAGS = $(CFLAGS)
 	@echo LDFLAGS = $(LDFLAGS)
 	@echo OBJS = $(OBJS)
+
+test:
+	for dir in $(TEST_DIRS) ; do \
+		echo $$dir ; \
+		cd tests/$$dir ; \
+		rake ; \
+		rake run ; \
+		cd -; \
+	done
 
 $(LIB_SO): $(OBJS)
 	@echo building archive "$(LIB_SO)"
