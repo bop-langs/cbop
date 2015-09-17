@@ -38,8 +38,7 @@ else
  	CFLAGS = $(CFLAGS_DEF) $(OPITIMIZEFLAGS)
 endif
 
-TEST_DIRS = add sleep
-#TODO enable string tests, str/BOP_string str/strsub str/strsub2
+TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2
 
 library: print_info $(LIB_SO) # $(HEADERS)
 
