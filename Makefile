@@ -49,7 +49,7 @@ print_info:
 	@echo LDFLAGS = $(LDFLAGS)
 	@echo OBJS = $(OBJS)
 
-test:
+test: library
 	for dir in $(TEST_DIRS) ; do \
 		echo $$dir ; \
 		cd tests/$$dir ; \
@@ -81,3 +81,9 @@ $(BUILD_DIR)/%.h: %.h
 
 clean:
 	rm -f $(OBJS) $(LIB_SO)
+	for dir in $(TEST_DIRS) ; do \
+		echo $$dir ; \
+		cd tests/$$dir ; \
+		rake clean ; \
+		cd -; \
+	done
