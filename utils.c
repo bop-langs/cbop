@@ -139,3 +139,18 @@ int get_int_from_env(const char* env, int min, int max, int def)
 
   return ival;
 }
+
+char * BOP_task_str(){
+  switch(task_status){
+    case MAIN:
+      return "Main speculation";
+    case SPEC:
+      return "Speculation";
+    case UNDY:
+      return "Understudy";
+    case SEQ:
+      return "Sequential";
+    default:
+      return "Unkown!";
+  }
+}
