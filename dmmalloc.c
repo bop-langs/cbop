@@ -474,7 +474,7 @@ static inline int index_bigger (int which) {
 }
 // Repeatedly split a larger block into a block of the required size
 static inline header* dm_split (int which, int larger) {
-  if(which > 8){
+  if(which > 15){
     bop_msg(3, "In large split");
   }
 #ifdef VISUALIZE
