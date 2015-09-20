@@ -477,9 +477,6 @@ static inline header* dm_split (int which, int larger) {
   if(which > 15){
     bop_msg(3, "In large split");
   }
-#ifdef VISUALIZE
-    printf("s");
-#endif
 #ifndef NDEBUG
     split_attempts[which]++;
     split_gave_head[which]++;
