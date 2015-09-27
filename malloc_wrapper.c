@@ -38,19 +38,19 @@
 
 //prototypes for the dlsym using calloc workaround
 void* tempcalloc(size_t, size_t);
-static inline void calloc_init();
+static __attribute__ ((noinline)) void calloc_init();
 
 
 static void *(*libc_malloc)(size_t) = NULL;
 static void *(*libc_realloc)(void*, size_t) = NULL;
 static void (*libc_free)(void*) = NULL;
-static void *(*libc_calloc)(size_t, size_t) = NULL;
+static void *(*volatile libc_calloc)(size_t, size_t) = NULL;
 static size_t (*libc_malloc_usable_size)(void*) = NULL;
 static int (*libc_posix_memalign)(void**, size_t, size_t) = NULL;
-static void *(*calloc_func)(size_t, size_t) = tempcalloc; //part of dlsym workaround
+static void *(*volatile calloc_func)(size_t, size_t) = tempcalloc; //part of dlsym workaround
 
 static char calloc_hack[CHARSIZE];
-static short initializing = 0;
+static volatile short initializing = 0;
 
 //Warning: Unsupported functions are currently ignored unless UNSUPPORTED_MALLOC is defined at compile time
 #ifdef UNSUPPORTED_MALLOC
@@ -80,14 +80,7 @@ struct mallinfo mallinfo() {
 #endif
 
 void* malloc(size_t s) {
-
-
     void* p = u_malloc(s);
-#ifdef PTR_CHECK
-    mallocs[mc] = p;
-    mc++;
-    dm_check(p);
-#endif
     return p;
 }
 void* realloc(void *p , size_t s) {
@@ -107,7 +100,7 @@ size_t malloc_usable_size(void* ptr) {
 }
 
 
-void * calloc(size_t sz, size_t n) {
+void * calloc(volatile size_t sz, volatile size_t n) {
     calloc_init();
     //make sure the right calloc_func is being used
     assert(calloc_func != NULL);
@@ -120,7 +113,7 @@ void * calloc(size_t sz, size_t n) {
     return p;
 }
 
-static inline void calloc_init() {
+static __attribute__ ((noinline)) void calloc_init() {
     if(libc_calloc == NULL && !initializing) {
         //first allocation
         initializing = 1; //don't recurse
