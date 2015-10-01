@@ -24,13 +24,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-/*NOTE DM_BLOCK_SIZE is only assessed at library compile time, so this is not visible for the user to change
- *Don't try to use this in compiling a bop program, it will not work
- *I examined getting this to work like BOP_Verbose and Group_Size, but it would likely cause more of a slowdown
- *then it is worth*/
-
-
-short malloc_panic = 0;
+short malloc_panic = 0; //force sequential allocation rules
 
 //BOP macros & structures
 #define SEQUENTIAL() (malloc_panic || bop_mode == SERIAL || BOP_task_status() == SEQ || BOP_task_status() == UNDY)
@@ -149,6 +143,7 @@ static inline void release_lock() {
     pthread_mutex_unlock(&lock);
 }
 #else
+#warning "Dmmalloc malloc not locking for thread"
 static inline void get_lock() {/*Do nothing*/}
 static inline void release_lock() {/*Do nothing*/}
 #endif //use locks
@@ -393,7 +388,7 @@ int alist_added = 0;
 extern void BOP_malloc_rescue(char *, size_t);
 // BOP-safe malloc implementation based off of size classes.
 void *dm_malloc (const size_t size) {
-	header * block = NULL;
+	volatile header * block = NULL;
 	int which, bigger = -1;
 	size_t alloc_size;
 	if(size == 0)
@@ -444,7 +439,7 @@ void *dm_malloc (const size_t size) {
   // Write allocated next information
   if(  !SEQUENTIAL()){
     bop_assert(which != -1); //valid because -1 == too large, can't do in PPR
-    add_next_list(&allocated_lists[which], block);
+    add_next_list(&allocated_lists[which], (header*) block);
   }
  checks:
 	ASSERTBLK(block);
