@@ -1,4 +1,3 @@
-//NOTE: do not compile with optimizations on. The hack to get calloc working (used in glibc/dlsym) is relies on undefined behavior, but has been tested to work correctly on redhat, fedora and ubuntu using GCC, and ubuntu with CLANG as well
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <stdio.h>
@@ -41,13 +40,8 @@ void* tempcalloc(size_t, size_t);
 static __attribute__ ((noinline)) void calloc_init();
 
 
-static void *(*libc_malloc)(size_t) = NULL;
-static void *(*libc_realloc)(void*, size_t) = NULL;
-static void (*libc_free)(void*) = NULL;
-static void *(*volatile libc_calloc)(size_t, size_t) = NULL;
-static size_t (*libc_malloc_usable_size)(void*) = NULL;
-static int (*libc_posix_memalign)(void**, size_t, size_t) = NULL;
-static void *(*volatile calloc_func)(size_t, size_t) = tempcalloc; //part of dlsym workaround
+static void *(*calloc_func)(size_t, size_t) = tempcalloc; //part of dlsym workaround
+static void *(*libc_calloc)(size_t, size_t) = NULL;
 
 static char calloc_hack[CHARSIZE];
 static volatile short initializing = 0;
@@ -134,14 +128,15 @@ void* tempcalloc(size_t s, size_t n) {
         calloc_hack[i] = '\0';
     return calloc_hack;
 }
-
 inline void * sys_malloc(size_t s) {
+    static void *(*libc_malloc)(size_t) = NULL;
     if(libc_malloc == NULL)
         libc_malloc = dlsym(RTLD_NEXT, "malloc");
     assert(libc_malloc != NULL);
     return libc_malloc(s);
 }
 inline void * sys_realloc(void * p , size_t size) {
+    static void *(*libc_realloc)(void*, size_t) = NULL;
     assert(p != calloc_hack);
     if(libc_realloc == NULL)
         libc_realloc = dlsym(RTLD_NEXT, "realloc");
@@ -150,6 +145,7 @@ inline void * sys_realloc(void * p , size_t size) {
     return p2;
 }
 inline void sys_free(void * p) {
+    static void (*libc_free)(void*) = NULL;
     if(p == calloc_hack)
         return;
     if(libc_free == NULL)
@@ -158,12 +154,14 @@ inline void sys_free(void * p) {
     libc_free(p);
 }
 inline size_t sys_malloc_usable_size(void* p) {
+    static size_t (*libc_malloc_usable_size)(void*) = NULL;
     if(libc_malloc_usable_size == NULL)
         libc_malloc_usable_size = dlsym(RTLD_NEXT, "malloc_usable_size");
     assert (libc_malloc_usable_size != NULL);
     return libc_malloc_usable_size(p);
 }
 inline int sys_posix_memalign(void** p, size_t a, size_t s) {
+    static int (*libc_posix_memalign)(void**, size_t, size_t) = NULL;
     if(libc_posix_memalign == NULL)
         libc_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign");
     assert(libc_posix_memalign != NULL);
@@ -175,31 +173,5 @@ inline void * sys_calloc(size_t s, size_t n) {
     assert(libc_calloc != NULL);
     void* p = libc_calloc(s, n);
     return p;
-}
-static inline char* check_pointer(void* raw_pointer) {
-    if(raw_pointer == NULL)
-      return "null, always valid\n";
-#ifdef PTR_CHECK
-    long long m = 0LL;
-    long long c =  0LL;
-    long long r = 0LL;
-    bool found = false;
-    for(m = 0LL; !found && m < mc; m++) {
-        if(mallocs[m] == raw_pointer)
-            return "mallocd";
-    }
-    for(c = 0LL; !found && c < cc; c++) {
-        if(callocs[c] == raw_pointer)
-            return "callocd";
-    }
-    for(r = 0LL; !found && r < rc; r++) {
-        return "reallocd";
-    }
-    printf("Freed unallocated block: %p", raw_pointer);
-    _exit(0);
-    return NULL;
-#else
-    return "not tracking pointers";
-#endif
 }
 #undef CHARSIZE
