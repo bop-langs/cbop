@@ -1,5 +1,3 @@
-#NOTE: for malloc_wrapper to build correctly it cannot be compiled with optimizaitons (ie don't specify -O option). All other seperate files can be compiled with optimizations as normal and still build correctly.
-
 CC ?= gcc
 ifeq ($(CC), cc)
   CC = gcc
@@ -62,11 +60,6 @@ $(LIB_SO): $(OBJS)
 	@echo building archive "$(LIB_SO)"
 	@ar r $(LIB_SO) $(OBJS)
 	@ranlib $(LIB_SO)
-
-$(BUILD_DIR)/%_wrapper.o: %_wrapper.c #any _wrapper class needs the optimization filtering
-		@mkdir -p $(@D)
-		@echo compiling $^
-		@$(CC) -c -o $@ $^ -O0 $(CFLAGS_DEF)
 
 all: $(OBJS)
 
