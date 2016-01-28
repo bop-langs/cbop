@@ -1,5 +1,3 @@
-#NOTE: for malloc_wrapper to build correctly it cannot be compiled with optimizaitons (ie don't specify -O option). All other seperate files can be compiled with optimizations as normal and still build correctly.
-
 CC ?= gcc
 ifeq ($(CC), cc)
   CC = gcc
@@ -18,7 +16,7 @@ _OBJS = malloc_wrapper.o dmmalloc.o ary_bitmap.o postwait.o bop_merge.o \
 				range_tree/dtree.o bop_ppr.o utils.o external/malloc.o \
 				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o
 
-CFLAGS_DEF = -Wall -fPIC -pthread -I. -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS)
+CFLAGS_DEF = -Wall -g -fPIC -pthread -I. -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS)
 CUSTOMDEF = -D USE_DL_PREFIX -D BOP -D USE_LOCKS -D UNSUPPORTED_MALLOC
 LDFLAGS = -Wl,--no-as-needed -ldl
 OPITIMIZEFLAGS = -O3
@@ -33,7 +31,7 @@ HEADERS = $(patsubst %,$(BUILD_DIR)/%,$(_HEADERS))
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
-	CFLAGS = $(CFLAGS_DEF) $(DEBUG_FLAGS) -O0
+	CFLAGS = $(CFLAGS_DEF) $(DEBUG_FLAGS)
 else
  	CFLAGS = $(CFLAGS_DEF) $(OPITIMIZEFLAGS)
 endif
@@ -62,11 +60,6 @@ $(LIB_SO): $(OBJS)
 	@echo building archive "$(LIB_SO)"
 	@ar r $(LIB_SO) $(OBJS)
 	@ranlib $(LIB_SO)
-
-$(BUILD_DIR)/%_wrapper.o: %_wrapper.c #any _wrapper class needs the optimization filtering
-		@mkdir -p $(@D)
-		@echo compiling $^
-		@$(CC) -c -o $@ $^ -O0 $(CFLAGS_DEF)
 
 all: $(OBJS)
 
