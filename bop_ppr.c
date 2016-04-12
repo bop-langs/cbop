@@ -467,7 +467,7 @@ void ErrorKillAll(int signo){
   //don't need to reap children. We know that it's an erroring-exit,
   //intecept the call, allert monitor process, execute def behavior
   /**Horrible things are happening. Go to SEQ mode so malloc won't have issues*/
-  bop_msg(1, "ERROR CAUGHT %d", signo);
+  bop_msg(1, "ERROR CAUGHT %s (%d)", strsignal(signo), signo);
   int om = bop_mode;
   malloc_panic = true;
   print_backtrace();

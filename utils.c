@@ -5,7 +5,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <pthread.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include "bop_api.h"
 #include "utils.h"
 
@@ -15,7 +17,7 @@ extern int ppr_index;
 extern int spec_order;
 extern bop_mode_t bop_mode;
 
-sem_t *bopmsg_sem = NULL;
+static pthread_mutex_t * msg_lock;
 
 task_status_t BOP_task_status(void) {
   return task_status;
@@ -62,8 +64,9 @@ char *strerror(int errnum);
 void bop_msg(int level, const char * msg, ...) {
  if(bop_verbose >= level)
   {
-      //msg_init();
-    sem_wait(bopmsg_sem);
+    msg_init();
+    if(msg_lock != NULL)
+      pthread_mutex_lock(msg_lock);
     va_list v;
     va_start(v,msg);
     fprintf(stderr, "%d-", getpid());
@@ -98,23 +101,23 @@ void bop_msg(int level, const char * msg, ...) {
     vfprintf(stderr,msg,v);
     fprintf(stderr,"\n");
     fflush(stderr);
-    sem_post(bopmsg_sem);
+    if(msg_lock != NULL)
+      pthread_mutex_unlock(msg_lock);
   }
 }
 
 void msg_init(){
-  if (!bopmsg_sem){
-      bopmsg_sem = sem_open("/bopmsg.sem", (O_CREAT), S_IRWXO|S_IRWXU|S_IRWXG, 0);
-      if(bopmsg_sem == SEM_FAILED){
-          printf("Error in BOP_Init: %s\n", strerror(errno));
-      }
-      assert(bopmsg_sem != NULL);
-      assert(bopmsg_sem != SEM_FAILED);
-      sem_post(bopmsg_sem);
+  if (!msg_lock){
+      msg_lock = mmap(NULL, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+      pthread_mutexattr_t mutexAttr;
+      if(pthread_mutexattr_init(&mutexAttr)) perror("Couldn't create mutex attr");
+      if(pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED)) perror("Error sharing mutex");
+      if(pthread_mutex_init(msg_lock, &mutexAttr)) perror("Error creating shared msg mutex");
   }
 }
 void msg_destroy(){
-  sem_close(bopmsg_sem);
+  munmap(msg_lock, 0);
+  pthread_mutex_destroy(msg_lock);
 }
 
 /* read the environment variable env, and returns it's integer value.
