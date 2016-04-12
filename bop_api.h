@@ -85,7 +85,7 @@ void BOP_record_write(void* addr, size_t size);
 typedef void monitor_t (void *, size_t);
 
 /* Called by a speculation process in case of error. */
-void BOP_abort_spec( const char* msg );
+void BOP_abort_spec( const char* msg, ...) __attribute__ ((format (printf, 1, 2)));
 void BOP_abort_next_spec( char* msg );
 
 /* FILE I/O */
@@ -175,7 +175,7 @@ size_t max_ppr_request;
 
 #define bop_msg(ignored, ...) printf( __VA_ARGS__ )
 
-#define BOP_abort_spec( msg )
+#define BOP_abort_spec( msg, ... )
 #define BOP_abort_next_spec( msg )
 #define BOP_abort_spec_group( msg )
 #define bop_assert(x) assert(x)
