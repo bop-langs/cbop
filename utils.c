@@ -15,8 +15,6 @@ extern int ppr_index;
 extern int spec_order;
 extern bop_mode_t bop_mode;
 
-sem_t *bopmsg_sem = NULL;
-
 task_status_t BOP_task_status(void) {
   return task_status;
 }
@@ -63,7 +61,6 @@ void bop_msg(int level, const char * msg, ...) {
  if(bop_verbose >= level)
   {
       //msg_init();
-    sem_wait(bopmsg_sem);
     va_list v;
     va_start(v,msg);
     fprintf(stderr, "%d-", getpid());
@@ -98,23 +95,13 @@ void bop_msg(int level, const char * msg, ...) {
     vfprintf(stderr,msg,v);
     fprintf(stderr,"\n");
     fflush(stderr);
-    sem_post(bopmsg_sem);
   }
 }
 
 void msg_init(){
-  if (!bopmsg_sem){
-      bopmsg_sem = sem_open("/bopmsg.sem", (O_CREAT), S_IRWXO|S_IRWXU|S_IRWXG, 0);
-      if(bopmsg_sem == SEM_FAILED){
-          printf("Error in BOP_Init: %s\n", strerror(errno));
-      }
-      assert(bopmsg_sem != NULL);
-      assert(bopmsg_sem != SEM_FAILED);
-      sem_post(bopmsg_sem);
-  }
+
 }
 void msg_destroy(){
-  sem_close(bopmsg_sem);
 }
 
 /* read the environment variable env, and returns it's integer value.
