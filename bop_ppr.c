@@ -44,7 +44,6 @@ int monitor_group = 0; //the process group that PPR tasks are using
 static bool is_monitoring = false;
 static bool errored = false;
 
-void BOP_abort_spec_2(bool, const char*); //only for in this function
 static void __attribute__((noreturn)) wait_process(void);
 static void __attribute__((noreturn)) end_clean(void); //exit if children errored or call abort
 static int  cleanup_children(void); //returns the value that end_clean would call with _exit (or 0 if would have aborted)
@@ -202,30 +201,24 @@ void BOP_malloc_rescue(char * msg, size_t size){
   }
   _exit(0); //my sanity
 }
-void BOP_abort_spec_2(bool really_abort, const char* msg){
+void  __attribute__ ((format (printf, 1, 2))) BOP_abort_spec(const char* msg, ...){
   if (task_status == SEQ
       || task_status == UNDY || bop_mode == SERIAL)
     return;
-
+    va_list argptr;
+     va_start(argptr,msg);
   if (task_status == MAIN)  { /* non-mergeable actions have happened */
     if ( partial_group_get_size() > 1 ) {
-      bop_msg(2, "Abort main speculation because %s", msg);
+      bop_msg(2, "Abort main speculation because %s", msg, argptr);
       partial_group_set_size( 1 );
     }
   }else{
-    bop_msg(2, "Abort alt speculation because %s", msg);
+    bop_msg(2, "Abort alt speculation because %s", msg, argptr);
     partial_group_set_size( spec_order );
     signal_commit_done( );
-    if(really_abort)
-      end_clean(); //_exit(0);  /* die silently, but reap children*/
-    else
-      bop_msg(2, "WARNING: Not calling abort to preserve exit values");
+    end_clean(); //_exit(0);  /* die silently, but reap children*/
   }
 }
-void BOP_abort_spec( const char *msg ) {
-  BOP_abort_spec_2(true, msg); //original behavior
-}
-
 void BOP_abort_next_spec( char *msg ) {
   if (task_status == SEQ
       || task_status == UNDY || bop_mode == SERIAL)
@@ -770,7 +763,7 @@ static void BOP_fini(void) {
   bop_msg(3, "An exit is reached in %s mode", status_name());
   switch (task_status) {
   case SPEC:
-    BOP_abort_spec_2(true, "SPEC reached an exit");  /* will abort */
+    BOP_abort_spec("SPEC reached an exit");  /* will abort */
     signal(SIGUSR2, SIG_IGN);
     kill(0, SIGUSR2); //send SIGUSR to spec group but not ourself-> own group
     //everything is termininating
