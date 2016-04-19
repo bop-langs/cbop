@@ -24,6 +24,8 @@ void undy_succ_fini( void );
 void ppr_group_init( void );
 void ppr_task_init( void );
 int  ppr_check_correctness( void );
+void on_exit_ordered(void);
+void on_enter_ordered(void);
 /* void report_conflict( void ); Name conflicts with something in utils.h */
 void data_commit( void );
 void task_group_commit( void );

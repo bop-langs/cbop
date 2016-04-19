@@ -7,7 +7,7 @@
 
 #ifndef NDEBUG
 /* We want the task status while debugging->bop_msg **/
-#define bop_debug(x, ...) bop_msg(1, "%s:%d " x "\n" , __FILE__, __LINE__, ##__VA_ARGS__);
+#define bop_debug(x, ...) bop_msg(1, "%s:%d " x "" , __FILE__, __LINE__, ##__VA_ARGS__);
 #else
 #define bop_debug(...)
 #endif

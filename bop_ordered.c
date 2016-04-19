@@ -5,6 +5,7 @@
 #include "bop_ports.h"
 #include "external/malloc.h"
 #include "postwait.h"
+#include "bop_ppr_sync.h"
 
 extern mspace metacow_space;
 
@@ -29,6 +30,7 @@ void BOP_ordered_begin( addr_t id ) {
     bop_msg( 2, "Entering ordered region "PRIdPTR, id );
     addr_t my_ch = channel_for_region( id );
     channel_wait( my_ch - 1 );
+    on_enter_ordered();
   }
   else
     bop_msg( 2, "Currently in ordered region "PRIdPTR". BOP_ordered_region( "PRIdPTR" ) ignored.", ordered_region_id, id );
@@ -47,19 +49,21 @@ static void fill_range( void *sum, mem_range_t *range ) {
 
 void BOP_ordered_end( addr_t id ) {
   if ( in_ordered_region && ordered_region_id == id ) {
-    bop_msg( 2, "Leaving ordered region "PRIdPTR, id );
+    bop_msg( 2, "Leaving ordered region %"PRIdPTR, id );
     addr_t my_ch = channel_for_region( id );
     map_inject( & ordered_writes, (void *) my_ch, fill_range );
     channel_post( my_ch );
+    on_exit_ordered();
     map_clear( & ordered_writes );
     in_ordered_region = 0;
+
   }
   else
     bop_msg( 2, "No matching ordered region (%d "PRIdPTR"). BOP_ordered_end( "PRIdPTR" ) ignored.", in_ordered_region, ordered_region_id, id );
 }
 
 static void ppr_reset( void ) {
-  if ( ordered_writes.residence == NULL ) 
+  if ( ordered_writes.residence == NULL )
     init_empty_map( & ordered_writes, metacow_space, "ordered_writes" );
   else
     map_clear( & ordered_writes );
