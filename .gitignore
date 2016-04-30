@@ -2,3 +2,5 @@ wrapper_test
 malloc_test
 *.o
 inst.a
+*.d
+*.d.tmp
