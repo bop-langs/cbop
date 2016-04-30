@@ -55,6 +55,8 @@ static void unblock_wait(void);
 //Semaphore msg init
 extern void msg_init();
 
+void (*external_reporter)(const char *, ...);
+
 
 static void _ppr_group_init( void ) {
   bop_msg( 3, "task group starts (gs %d)", BOP_get_group_size() );
@@ -390,7 +392,7 @@ void BOP_this_group_over(){
   _BOP_group_over(ppr_static_id);
 }
 void _BOP_ppr_end(int id) {
-  bop_msg(1, "Reached PPR end (pid %d)", getpid());
+  bop_msg(2, "Reached PPR end (pid %d)", getpid());
   if (ppr_pos == GAP || ppr_static_id != id)  {
     bop_msg(4, "Unmatched end PPR (region %d in/after region %d) ignored", id, ppr_static_id);
     return;
@@ -457,17 +459,19 @@ void print_backtrace(void){
   bop_msg(1, "\nEND BACKTRACE");
 }
 void ErrorKillAll(int signo){
+  static const char * msg_f = "Error caught signal %d";
   //don't need to reap children. We know that it's an erroring-exit,
   //intecept the call, allert monitor process, execute def behavior
   /**Horrible things are happening. Go to SEQ mode so malloc won't have issues*/
-  bop_msg(1, "ERROR CAUGHT %d", signo);
-  int om = bop_mode;
   malloc_panic = true;
-  print_backtrace();
+  if(external_reporter != NULL)
+    external_reporter(msg_f, signo);
+  else{
+    bop_msg(1, msg_f, signo);
+    print_backtrace();
+  }
   error_alert_monitor();
-  signal(signo, SIG_DFL);
-  raise(signo);
-  bop_mode = om;
+  exit(-1);
 }
 void SigUsr1(int signo, siginfo_t *siginfo, ucontext_t *cntxt) {
   assert( SIGUSR1 == signo );
@@ -544,9 +548,9 @@ int report_child(pid_t child, int status){
   //   is_monitoring = false;
   // }
   if(val != -1)
-    bop_msg(1, msg, child, val);
+    bop_msg(2, msg, child, val);
   else
-    bop_msg(1, msg, child);
+    bop_msg(2, msg, child);
   return rval;
 }
 static inline void block_wait(){
@@ -796,7 +800,7 @@ static void BOP_fini(void) {
   gettimeofday(&tv, NULL);
   double bop_end_time = tv.tv_sec+(tv.tv_usec/1000000.0);
 
-  bop_msg( 1, "\n***BOP Report***\n The total run time is %.2lf seconds.  There were %d ppr tasks, %d executed speculatively and %d non-speculatively (%d by main and %d by understudy). pid %d\n",
+  bop_msg(0, "\n***BOP Report***\n The total run time is %.2lf seconds.  There were %d ppr tasks, %d executed speculatively and %d non-speculatively (%d by main and %d by understudy). pid %d\n",
 	   bop_end_time - bop_stats.start_time, ppr_index,
 	   bop_stats.num_by_spec, bop_stats.num_by_undy + bop_stats.num_by_main, bop_stats.num_by_main, bop_stats.num_by_undy, getpid());
 
