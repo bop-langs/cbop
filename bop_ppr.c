@@ -27,6 +27,7 @@ extern bop_port_t bop_merge_port;
 extern bop_port_t postwait_port;
 extern bop_port_t bop_ordered_port;
 extern bop_port_t bop_alloc_port;
+extern void bop_msg_va(int level, const char * msg, va_list v);
 
 volatile task_status_t task_status = SEQ;
 volatile ppr_pos_t ppr_pos = GAP;
@@ -203,30 +204,41 @@ void BOP_malloc_rescue(char * msg, size_t size){
   }
   _exit(0); //my sanity
 }
+static inline void abort_printf(const char * abrt_msg, const char * usr_msg,
+    va_list argptr){
+  char buffer[strlen(usr_msg) + strlen(abrt_msg) + 2] ;
+  size_t size = sizeof(buffer);
+  size_t written = snprintf(buffer, sizeof(buffer), "%s %s", abrt_msg, usr_msg);
+  assert(written < size);
+  bop_msg_va(2, buffer, argptr);
+}
+
 void  __attribute__ ((format (printf, 1, 2))) BOP_abort_spec(const char* msg, ...){
-  if (task_status == SEQ
-      || task_status == UNDY || bop_mode == SERIAL)
+  if (task_status == SEQ || task_status == UNDY || bop_mode == SERIAL)
     return;
-    va_list argptr;
-     va_start(argptr,msg);
+  va_list argptr;
+  va_start(argptr,msg);
   if (task_status == MAIN)  { /* non-mergeable actions have happened */
     if ( partial_group_get_size() > 1 ) {
-      bop_msg(2, "Abort main speculation because %s", msg, argptr);
+      abort_printf("Abort main speculation because", msg, argptr);
+      va_end(argptr);
       partial_group_set_size( 1 );
     }
   }else{
-    bop_msg(2, "Abort alt speculation because %s", msg, argptr);
+    abort_printf("Abort alt speculation because", msg, argptr);
+    va_end(argptr);
     partial_group_set_size( spec_order );
     signal_commit_done( );
     end_clean(); //_exit(0);  /* die silently, but reap children*/
   }
 }
-void BOP_abort_next_spec( char *msg ) {
-  if (task_status == SEQ
-      || task_status == UNDY || bop_mode == SERIAL)
+void __attribute__ ((format (printf, 1, 2))) BOP_abort_next_spec( char *msg, ... ) {
+  if (task_status == SEQ || task_status == UNDY || bop_mode == SERIAL)
     return;
-
-  bop_msg(2, "Abort next speculation because %s", msg);
+  va_list argptr;
+  va_start(argptr,msg);
+  abort_printf("Abort next speculation because", msg, argptr);
+  va_end(argptr);
   if (task_status == MAIN)  /* non-mergeable actions have happened */
     partial_group_set_size( 1 );
   else

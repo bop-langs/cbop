@@ -57,44 +57,50 @@ extern char in_ordered_region;  // bop_ordered.c
 extern int errno;
 char *strerror(int errnum);
 
-void bop_msg(int level, const char * msg, ...) {
- if(bop_verbose >= level)
-  {
-      //msg_init();
-    va_list v;
-    va_start(v,msg);
-    fprintf(stderr, "%d-", getpid());
-    char *pos;
-    switch (ppr_pos) {
-    case PPR:
-      pos = "";
-      break;
-    case GAP:
-      pos = "g";
-      break;
-    default:
-      assert(0);
-    }
-    if (in_ordered_region) {
-      assert( ppr_pos == PPR );
-      pos = "od";
-   }
-    unsigned pidx = BOP_ppr_index( );
-    switch(task_status) {
+void bop_msg_va(int level, const char * msg, va_list v){
+  if(bop_verbose >= level) {
+  fprintf(stderr, "%d-", getpid());
+  char *pos;
+  switch (ppr_pos) {
+  case PPR:
+    pos = "";
+    break;
+  case GAP:
+    pos = "g";
+    break;
+  default:
+    assert(0);
+  }
+  if (in_ordered_region) {
+    assert( ppr_pos == PPR );
+    pos = "od";
+  }
+  unsigned pidx = BOP_ppr_index( );
+  switch(task_status) {
     case UNDY: fprintf(stderr, "Undy-(idx %d%s): ", pidx, pos); break;
     case MAIN: fprintf(stderr, "Main-%d(idx %d%s): ", spec_order, pidx, pos); break;
     case SEQ: fprintf(stderr, "Seq-(idx %d%s): ", pidx, pos); break;
     case SPEC: fprintf(stderr, "Spec-%d(idx %d%s): ", spec_order, pidx, pos); break;
-    }
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    double curr_time = tv.tv_sec + (tv.tv_usec/1000000.0);
-    if (bop_stats.start_time != 0)
-      fprintf(stderr, " (%.6lfs) ", curr_time - bop_stats.start_time);
+  }
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  double curr_time = tv.tv_sec + (tv.tv_usec/1000000.0);
+  if (bop_stats.start_time != 0)
+    fprintf(stderr, " (%.6lfs) ", curr_time - bop_stats.start_time);
 
-    vfprintf(stderr,msg,v);
-    fprintf(stderr,"\n");
-    fflush(stderr);
+  vfprintf(stderr,msg,v);
+  fprintf(stderr,"\n");
+  fflush(stderr);
+  }
+}
+
+void bop_msg(int level, const char * msg, ...) {
+ if(bop_verbose >= level)
+  {
+    va_list v;
+    va_start(v,msg);
+    bop_msg_va(level, msg, v);
+    va_end(v);
   }
 }
 
