@@ -1,28 +1,30 @@
 #ifndef DM_MALLOC_H
 #define DM_MALLOC_H
 
-#define DM_DEBUG
 #include <stddef.h>
 #include <stdbool.h>
 
 //dm structs, unions etc
-typedef union {
-    //NOTE: the two nexts must be the same address for some utility functions in dmmalloc.c
-    struct {
-        union header * next;   // ppr-allocated object list
-        size_t blocksize; // which free list to insert freed items into
-    } allocated;
-    struct {
-        //doubly linked free list for partioning
-        union header * next;
-        union header * prev;
-
-    } free;
+typedef struct {
+  struct header * next;
+#ifdef DM_REM_ALLOC
+  bool allocated;
+#endif
+  union{
+    size_t blocksize;
+    struct header * prev;
+  };
 } header;
+
+#ifdef DM_REM_ALLOC
+#define SET_ALLOCATED(h,a) (h->allocated = a)
+#else
+#define SET_ALLOCATED(h,a)
+#endif
 
 //prototypes
 void * dm_malloc(size_t);
-void * dm_realloc(const void *, size_t);
+void * dm_realloc(void *, size_t);
 void dm_free(void *);
 void * dm_calloc(size_t, size_t);
 void dm_print_info(void);
@@ -55,12 +57,12 @@ void malloc_merge_counts(bool); //counts get updated AFTER abort status is known
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
 #define HSIZE (ALIGN((sizeof(header))))
 #define HEADER(vp) ((header *) (((char *) (vp)) - HSIZE))
-#define CAST_UH(h) ((union header *) (h))
+#define CAST_UH(h) ((struct header *) (h))
 #define CAST_H(h) ((header*) (h))
 #define CHARP(p) (((char*) (p)))
 #define PAYLOAD(hp) ((header *) (((char *) (hp)) + HSIZE))
 #define PTR_MATH(ptr, d) ((CHARP(ptr)) + d)
-#define ASSERTBLK(head) bop_assert ((head)->allocated.blocksize > 0);
+#define ASSERTBLK(head) bop_assert ((head)->blocksize > 0);
 
 //class size macros
 #define DM_NUM_CLASSES 16

@@ -5,7 +5,7 @@ endif
 
 
 CFLAGS = -Wall -g -fPIC -pthread -I. -Wno-unused-function $(CUSTOMDEF)
-CUSTOMDEF = -D USE_DL_PREFIX -D BOP -D USE_LOCKS -D UNSUPPORTED_MALLOC
+CUSTOMDEF = -D USE_DL_PREFIX -D BOP -D USE_LOCKS -D UNSUPPORTED_MALLOC -D DM_DEBUG
 LDFLAGS = -Wl,--no-as-needed -ldl
 OPITIMIZEFLAGS = -O3
 DEBUG_FLAGS = -ggdb3 -g3 -pg -D CHECK_COUNTS -U NDEBUG
@@ -43,7 +43,7 @@ $(LIB): $(OBJS)
 
 all: $(OBJS)
 
--include $(OBJS:.o=.d)
+# -include $(OBJS:.o=.d)
 
 %.o: %.c
 	@echo compiling $^
