@@ -409,6 +409,7 @@ void *dm_malloc (const size_t size) {
 				block = sys_malloc (alloc_size);
 				if (block == NULL) {
 					//ERROR: ran out of system memory. malloc rescue won't help
+					release_lock();
 					return NULL;
 				}
 				//don't need to add to free list, just set information
