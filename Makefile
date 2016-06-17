@@ -9,7 +9,7 @@ CUSTOMDEF = -D USE_DL_PREFIX -D BOP -D USE_LOCKS -D UNSUPPORTED_MALLOC -D DM_DEB
 LDFLAGS = -Wl,--no-as-needed -ldl
 OPITIMIZEFLAGS = -O3
 DEBUG_FLAGS = -ggdb3 -g3 -pg -D CHECK_COUNTS -U NDEBUG
-LIB = libinst.a
+LIB = inst.a
 
 
 SRC := $(wildcard *.c) $(wildcard external/*.c) $(wildcard range_tree/*.c)

@@ -1,6 +1,6 @@
 wrapper_test
 malloc_test
 *.o
-libinst.a
+inst.a
 *.d
 *.d.tmp
