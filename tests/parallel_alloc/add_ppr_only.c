@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
+
+#include <sys/types.h>
+#include <unistd.h>
 
 /* The program makes an array of randomly initialized integers and adds them together. */
 
@@ -72,6 +76,8 @@ main(int argc, char ** argv)
         BOP_ppr_end(1);    /* End PPR */
         index++;
     }
+
+    double sum = get_sum(sums, num_blocks);
 
     printf("%d: The sum is %.0f million (%.0f) \n", getpid(), sum/1000000, sum);
     return 0;

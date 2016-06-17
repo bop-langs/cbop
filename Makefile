@@ -16,7 +16,7 @@ SRC := $(wildcard *.c) $(wildcard external/*.c) $(wildcard range_tree/*.c)
 OBJS = $(SRC:.c=.o)
 
 
-TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2
+TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2 parallel_alloc
 
 library: print_info $(LIB)
 

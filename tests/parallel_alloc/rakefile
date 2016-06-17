@@ -2,7 +2,7 @@ load '../bop_test.rake'
 
 $c_flags = '-g3'
 
-$params = '20 4'
+$params = '200 2'
 
-bop_test 'add', nil, false # Orig version fails
+# bop_test 'add', nil, false # Orig version fails
 bop_test 'add_ppr_only'
