@@ -5,3 +5,4 @@ inst.a
 libinst.a
 *.d
 *.d.tmp
+cscope.out

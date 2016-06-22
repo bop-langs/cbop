@@ -298,7 +298,7 @@ static inline void grow(const int tasks) {
     // THIS IS THE NEW GROW FUNCTION!
     int class_index, blocks_left, size;
     if (tasks > 1)
-      bop_debug("growing tasks = %d", tasks);
+        bop_debug("growing tasks = %d", tasks);
 #ifndef NDEBUG
     grow_count++;
 #endif
