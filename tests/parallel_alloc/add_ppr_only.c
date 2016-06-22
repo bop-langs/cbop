@@ -48,30 +48,26 @@ main(int argc, char ** argv)
     printf("%d: adding %d million numbers\n", getpid(), data_size/1000000);
     block_size = ceil((float)data_size / num_blocks);
 
-
     double sums[num_blocks];
-    double *blocks[num_blocks];
     memset(&sums, 0, num_blocks * sizeof(double));
-    for (size_t i = 0; i < num_blocks; ++i) {
-        blocks[i] = malloc(block_size * sizeof(double));
-        assert(blocks[i] != NULL);
-    }
 
     int index = 0;
     while (data_size > 0) {
         int block_end = data_size;
         data_size -= block_size;
         int block_begin = data_size >= 0 ? data_size : 0 ;
-        double *block = blocks[index];
-        assert(block != NULL);
 
         BOP_ppr_begin(1);    /* Begin PPR */
 
+        double *block = malloc((block_end - block_begin) * sizeof(*block));
+        assert(block != NULL);
         initialize(block, block_end - block_begin);
         BOP_promise(block, (block_end - block_begin) * sizeof(*block));
 
+        BOP_use(block, (block_end - block_begin) * sizeof(*block));
         sums[index] = get_sum(block, block_end - block_begin);
         BOP_promise(&sums[index], sizeof(double));
+        free(block);
 
         BOP_ppr_end(1);    /* End PPR */
         index++;
