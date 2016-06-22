@@ -395,7 +395,7 @@ extern void BOP_malloc_rescue(char *, size_t);
 
 // BOP-safe malloc implementation based off of size classes.
 void *dm_malloc(const size_t size) {
-    volatile header * block = NULL;
+    volatile header *block = NULL;
     int which, bigger = -1;
     size_t alloc_size;
     if (size == 0)
@@ -479,7 +479,7 @@ static inline int index_bigger(int which) {
 }
 
 // Repeatedly split a larger block into a block of the required size
-static inline header* dm_split(int which, int larger) {
+static inline header *dm_split(int which, int larger) {
     if (which > 15) {
         bop_msg(3, "In large split");
     }
@@ -625,7 +625,7 @@ void dm_free(void *ptr) {
 }
 
 // Free a(regular or huge) block now. all saftey checks must be done before calling this function
-static inline void free_now(header * head) {
+static inline void free_now(header *head) {
     int which;
     size_t size = head->blocksize;
     ASSERTBLK(head);
@@ -673,9 +673,9 @@ inline size_t dm_malloc_usable_size(void *ptr) {
 }
 
 /*malloc library utility functions: utility functions, debugging, list management etc */
-static bool remove_from_alloc_list(header * val) {
+static bool remove_from_alloc_list(header *val) {
     // Remove val from the list
-    header* current, * prev = NULL;
+    header *current, *prev = NULL;
     const int index = get_index(val->blocksize);
     for (current = allocated_lists[index]; current; prev = current, current = CAST_H(current->next)) {
         if (current == val) {
@@ -691,7 +691,7 @@ static bool remove_from_alloc_list(header * val) {
     return false;
 }
 
-static inline bool list_contains(header * list, header * search_value) {
+static inline bool list_contains(header *list, header *search_value) {
     if (list == NULL || search_value == NULL)
         return false;
     header *current;
@@ -706,7 +706,7 @@ static inline bool list_contains(header * list, header * search_value) {
 static int added_n = 0;
 static int nseq_added_n = 0;
 
-static inline void add_next_list(header** list_head, header * item) {
+static inline void add_next_list(header **list_head, header *item) {
     added_n++;
     if (!SEQUENTIAL())
         nseq_added_n++;
@@ -715,7 +715,7 @@ static inline void add_next_list(header** list_head, header * item) {
     *list_head = item;
 }
 
-static inline void add_freed_list(header* item) {
+static inline void add_freed_list(header *item) {
     size_t size = item->blocksize;
     int index = get_index(size);
     if (index >= DM_NUM_CLASSES) {
