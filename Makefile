@@ -4,7 +4,7 @@ ifeq ($(CC), cc)
 endif
 
 
-CFLAGS = -Wall -g -fPIC -pthread -I. -Wno-unused-function $(CUSTOMDEF)
+CFLAGS = -Wall -g -fPIC -pthread -I. -Wno-unused-function -save-temps $(CUSTOMDEF)
 CUSTOMDEF = -D USE_DL_PREFIX -D BOP -D USE_LOCKS -D UNSUPPORTED_MALLOC -D DM_DEBUG
 LDFLAGS = -Wl,--no-as-needed -ldl
 OPITIMIZEFLAGS = -O3
@@ -51,7 +51,7 @@ all: $(OBJS)
 	@gcc -c -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(OBJS) $(LIB) *.d *.d.tmp
+	rm -f $(OBJS) $(LIB) *.d *.d.tmp *.[ios]
 	for dir in $(TEST_DIRS) ; do \
 		echo $$dir ; \
 		cd tests/$$dir ; \
