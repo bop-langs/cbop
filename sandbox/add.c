@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "bop_api.h"
+#include "dmmalloc.h"
 
 /* The program makes an array of randomly initialized integers and adds them together. */
 
@@ -63,6 +64,10 @@ main(int argc, char **argv)
     }
 
     printf("%d: %d million numbers added. The sum is %.0f million (%.0f) \n", getpid(), datasize/1000000, sum/1000000, sum);
+
+    free(data);
+
+    dm_print_info();
 
     return 0;
 }
