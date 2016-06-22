@@ -55,6 +55,9 @@ typedef struct _mem_range_t {
   unsigned task;     /* optional ppr_index used by post-wait */
 } mem_range_t;
 
+int _BOP_ppr_begin(int id);
+void _BOP_ppr_end(int id);
+
 // %------------------ Function Prototype -------------- %
 /* the TOLABEL macro by Grant Farmer */
 #define TOL(x) L##x
