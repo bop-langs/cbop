@@ -1,8 +1,8 @@
 #ifndef DM_MALLOC_H
 #define DM_MALLOC_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // Dm structs, unions etc
 typedef struct {
@@ -17,27 +17,36 @@ typedef struct {
 } header;
 
 #ifdef DM_REM_ALLOC
-#define SET_ALLOCATED(h,a) (h->allocated = a)
+#define SET_ALLOCATED(h, a) (h->allocated = a)
 #else
-#define SET_ALLOCATED(h,a)
+#define SET_ALLOCATED(h, a)
 #endif
 
 // Prototypes
 void *dm_malloc(size_t);
-void *dm_realloc(void *, size_t);
-void dm_free(void *);
+void *
+dm_realloc(void *, size_t);
+void
+dm_free(void *);
 void *dm_calloc(size_t, size_t);
-void dm_print_info(void);
-size_t dm_malloc_usable_size(void *);
-void dm_check(void *);
+void
+dm_print_info(void);
+size_t
+dm_malloc_usable_size(void *);
+void
+dm_check(void *);
 
 // Bop-related functions
-void carve(); // Divide up avaliable memory
-void initialize_group(); // Set end pointers for this ppr task
+void
+carve(); // Divide up avaliable memory
+void
+initialize_group(); // Set end pointers for this ppr task
 
 // Data accessors for merge time
-void malloc_merge(void);
-void malloc_merge_counts(bool); // Counts get updated AFTER abort status is known
+void
+malloc_merge(void);
+void
+malloc_merge_counts(bool); // Counts get updated AFTER abort status is known
 
 // Alignment based on word size
 #if __WORDSIZE == 64
@@ -54,7 +63,7 @@ void malloc_merge_counts(bool); // Counts get updated AFTER abort status is know
 #endif
 
 // Alignement/ header macros
-#define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
+#define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 #define HSIZE (ALIGN((sizeof(header))))
 #define HEADER(vp) ((header *)(((char *)(vp)) - HSIZE))
 #define CAST_UH(h) ((struct header *)(h))
@@ -66,9 +75,12 @@ void malloc_merge_counts(bool); // Counts get updated AFTER abort status is know
 
 // Class size macros
 #define DM_NUM_CLASSES 16
-#define DM_CLASS_OFFSET 4 // How much extra to shift the bits for size class, ie class k is 2 ^ (k + DM_CLASS_OFFSET)
+#define DM_CLASS_OFFSET \
+    4 // How much extra to shift the bits for size class, ie class k is 2 ^ (k
+      // + DM_CLASS_OFFSET)
 #define MAX_SIZE SIZE_C(DM_NUM_CLASSES)
-#define SIZE_C(k) (ALIGN((1 << (k + DM_CLASS_OFFSET)))) // Allows for iterative spliting
+#define SIZE_C(k) \
+    (ALIGN((1 << (k + DM_CLASS_OFFSET)))) // Allows for iterative spliting
 #define DM_MAX_REQ (ALIGN((MAX_SIZE) - (HSIZE)))
 
 #endif
