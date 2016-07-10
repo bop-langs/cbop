@@ -1,4 +1,4 @@
-CFLAGS = -O2 -fPIC -pthread -I.. -DBOP=1
+CFLAGS = -g3 -fPIC -pthread -I.. -DBOP=1
 LDFLAGS = $(CFLAGS) -L..
 LDLIBS = -linst -lm -ldl
 
