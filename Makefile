@@ -35,3 +35,4 @@ $(LIB): $(OBJS)
 .PHONY: clean
 clean:
 	find -type f -name '*.[ios]' -delete
+	rm -f $(LIB) tags cscope.out
