@@ -75,6 +75,12 @@ void (*external_reporter)(const char *, ...);
 static void
 _ppr_group_init(void)
 {
+    static int group_init = 0;
+    if (group_init) {
+        return;
+    }
+    group_init = 1;
+
     bop_msg(3, "task group starts (gs %d)", BOP_get_group_size());
 
     /* setup bop group id. */
@@ -100,8 +106,9 @@ _ppr_task_init(void)
         spec_order += 1;
         break;
     case UNDY:
-    case SEQ:
         assert(0);
+    case SEQ:
+        return;
     }
 
     bop_msg(2,
