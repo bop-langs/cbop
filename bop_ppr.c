@@ -880,8 +880,8 @@ void __attribute__((constructor)) BOP_init(void)
     sigaction(SIGTTIN, &action, NULL);
 
     /* Read environment variables: BOP_GroupSize, BOP_Verbose */
-    bop_verbose = get_int_from_env("BOP_Verbose", 0, 6, 0);
-    int g       = get_int_from_env("BOP_GroupSize", 1, 100, 2);
+    bop_verbose = get_int_from_env("BOP_VERBOSE", 0, 6, 0);
+    int g       = get_int_from_env("BOP_GROUPSIZE", 1, 100, 2);
 
     BOP_set_group_size(g);
     bop_mode = g < 2 ? SERIAL : PARALLEL;
