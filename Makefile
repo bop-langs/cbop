@@ -36,3 +36,4 @@ $(LIB): $(OBJS)
 clean:
 	find -type f -name '*.[ios]' -delete
 	rm -f $(LIB) tags cscope.out
+	find -type f -iname rakefile -execdir rake clean \; 2>/dev/null || true
