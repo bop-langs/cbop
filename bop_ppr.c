@@ -759,6 +759,7 @@ wait_process()
                              status); // we only care about zero v. not-zero
         }
         unblock_wait();
+        sleep(1);
     }
     errno = 0;
     // handle remaining processes. Above may not have gotten everything
