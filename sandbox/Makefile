@@ -3,12 +3,12 @@ LDFLAGS = $(CFLAGS) -L..
 LDLIBS = -linst -lm -ldl
 
 .PHONY: all
-all: ../libinst.a add
+all: add
 
-../libinst.a:
+../libinst.a: $(wildcard ../*.[ch])
 	$(MAKE) -C ..
 
-add: add.o
+add: add.o ../libinst.a
 
 .PHONY: clean
 clean:

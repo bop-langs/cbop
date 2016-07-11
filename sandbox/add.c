@@ -52,7 +52,7 @@ main(int argc, char **argv)
         n = i + blocksize > datasize ? datasize : i + blocksize;
 
         BOP_record_read(data + i, (n - i) * sizeof(*data));
-        for (int j = i; j < n; j++) {
+        for (int j = i; j < n; j += 3) {
             sump += sin(data[j]) * sin(data[j]) + cos(data[j]) * cos(data[j]);
         }
 
