@@ -72,6 +72,9 @@ msg_init();
 
 void (*external_reporter)(const char *, ...);
 
+char *
+status_name(void);
+
 static void
 _ppr_group_init(void)
 {
@@ -151,8 +154,9 @@ _BOP_ppr_begin(int id)
 
         /* no spawn if sequential or reaching group size */
         if (bop_mode == SERIAL || spec_order >= partial_group_get_size() - 1) {
-            if (bop_mode == SERIAL)
+            if (bop_mode == SERIAL) {
                 _ppr_task_init();
+            }
             return 0;
         }
         block_wait();
