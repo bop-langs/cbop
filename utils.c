@@ -81,7 +81,7 @@ void
 bop_msg_va(int level, const char *msg, va_list v)
 {
     if (bop_verbose >= level) {
-        fprintf(stderr, "%d-", getpid());
+        fprintf(stderr, "%d [%d] ", getpid(), level);
         char *pos;
 
         switch (ppr_pos) {
