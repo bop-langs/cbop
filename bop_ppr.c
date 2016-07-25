@@ -101,6 +101,7 @@ _ppr_group_init(void)
 static void
 _ppr_task_init(void)
 {
+    assert(spec_order >= 0);
     switch (task_status) {
     case MAIN:
         assert(spec_order == 0);
@@ -343,6 +344,7 @@ post_ppr_undy(void)
 
     undy_succ_fini();
 
+    spec_order  = 0;
     task_status = SEQ;
     ppr_pos     = GAP;
     bop_stats.num_by_undy += undy_ppr_count;
@@ -755,12 +757,16 @@ wait_process()
 
     while (is_monitoring) {
         block_wait();
-        if (((child = waitpid(monitor_group, &status, WNOHANG | WUNTRACED)) !=
-             -1)) {
+        child = waitpid(monitor_group, &status, WNOHANG | WUNTRACED);
+        if (child != -1) {
             my_exit =
                 my_exit ||
                 report_child(child,
                              status); // we only care about zero v. not-zero
+        } else {
+            if (errno == ECHILD) {
+                is_monitoring = false;
+            }
         }
         unblock_wait();
     }
