@@ -2,19 +2,34 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <sys/types.h>
+#include <unistd.h>
 
 /* The program makes an array of randomly initialized integers and adds them
  * together. */
 
 #include "bop_api.h"
 
-double *data;
-double sum;
+static void
+initialize(double *array, size_t len)
+{
+    for (size_t i = 0; i < len; ++i) {
+        array[i] = sin(i) * sin(i) + cos(i) * cos(i);
+    }
+}
 
-void
-initialize(int);
-double
-lots_of_computation_on_block(int start, int end);
+static double
+get_sum(double *array, size_t len)
+{
+    double sum = 0;
+
+    for (size_t i = 0; i < len; ++i) {
+        sum += array[i];
+    }
+    return sum;
+}
 
 int
 main(int argc, char **argv)
@@ -31,13 +46,15 @@ main(int argc, char **argv)
     assert(data_size > 0);
     num_blocks = atoi(argv[2]);
     assert(num_blocks > 0);
-    double *sums = (double *)malloc(num_blocks * sizeof(double));
-
-    initialize(data_size);
 
     printf("%d: adding %d million numbers\n", getpid(), data_size / 1000000);
     block_size = ceil((float)data_size / num_blocks);
-    int index  = 0;
+
+    double sums[num_blocks];
+
+    memset(&sums, 0, num_blocks * sizeof(double));
+
+    int index = 0;
 
     while (data_size > 0) {
         int block_end = data_size;
@@ -47,56 +64,24 @@ main(int argc, char **argv)
 
         BOP_ppr_begin(1); /* Begin PPR */
 
-        double block_sum =
-            lots_of_computation_on_block(block_begin, block_end);
+        double *block = malloc((block_end - block_begin) * sizeof(*block));
 
-        sums[index] = block_sum;
+        assert(block != NULL);
+        initialize(block, block_end - block_begin);
+        BOP_promise(block, (block_end - block_begin) * sizeof(*block));
 
+        BOP_use(block, (block_end - block_begin) * sizeof(*block));
+        sums[index] = get_sum(block, block_end - block_begin);
         BOP_promise(&sums[index], sizeof(double));
+        free(block);
 
         BOP_ppr_end(1); /* End PPR */
         index++;
     }
 
-    int i;
-
-    for (i = 0; i < index; i++)
-        sum += sums[i];
+    double sum = get_sum(sums, num_blocks);
 
     printf(
         "%d: The sum is %.0f million (%.0f) \n", getpid(), sum / 1000000, sum);
     return 0;
-}
-
-void
-initialize(int data_size)
-{
-    int i, _s;
-
-    /* initialization */
-    printf("%d: initializing %d million numbers\n",
-           getpid(),
-           data_size / 1000000);
-
-    data = (double *)malloc(data_size * sizeof(double));
-    assert(data != NULL);
-
-    for (i      = 0; i < data_size; i++)
-        data[i] = i;
-
-    sum = 0;
-}
-
-double
-lots_of_computation_on_block(int start, int end)
-{
-    int j;
-    double total = 0;
-
-    for (j = start; j < end; j++)
-        total += sin(data[j]) * sin(data[j]) + cos(data[j]) * cos(data[j]);
-
-    BOP_record_read(&data[j], sizeof(double) * (end - start));
-
-    return total;
 }
