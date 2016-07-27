@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <fcntl.h>
 #include <semaphore.h> //BOP_msg locking
@@ -770,6 +771,7 @@ wait_process()
         }
         unblock_wait();
     }
+    usleep(10000);
     errno = 0;
     // handle remaining processes. Above may not have gotten everything
     block_wait();

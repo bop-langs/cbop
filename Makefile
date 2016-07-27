@@ -10,7 +10,7 @@ LDLIBS_ALL = -ldl $(LDLIBS)
 SRC := $(wildcard *.c) $(wildcard range_tree/*.c) $(wildcard external/*.c)
 OBJS = $(SRC:.c=.o)
 
-TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2 parallel_alloc
+TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2 parallel_alloc unit_tests
 
 .PHONY: all
 all: $(LIB)
