@@ -20,4 +20,5 @@ int getuniqueid() {
 bop_port_t bop_alloc_port = {
 	.ppr_group_init		= beginspec,
 	.task_group_commit	= endspec,
+  .undy_init = endspec,
 };
