@@ -25,7 +25,7 @@ typedef uintptr_t addr_t;
 
 typedef enum {
   SEQ = -2, // sequential mode, ready to change at next PPR
-  UNDY,  // the understudy
+  UNDY = 0,  // the understudy
   MAIN,  // first PPR task after SEQ mode
   SPEC   // a speculation process
 } task_status_t;
@@ -102,8 +102,7 @@ mem_range_t *BOP_check_access(void* addr);
 void bop_set_verbose( int );
 int bop_get_verbose( void );
 void bop_msg(int level, const char * msg, ...);
-extern short malloc_panic;
-#define bop_assert(x) if(!(x)) {malloc_panic = 1; bop_msg(0, ("Assertion: %s failed, %s:%d %s"), #x, __FILE__, __LINE__, __func__); abort();}
+#define bop_assert(x) if(!(x)) {bop_msg(0, ("Assertion: %s failed, %s:%d %s"), #x, __FILE__, __LINE__, __func__); abort();}
 
 /* For collecting statistics */
 typedef struct {
@@ -123,8 +122,6 @@ void *_BOP_calloc(size_t n_elements, size_t elem_size, char *file, unsigned line
 void _BOP_free(void* mem, char *file, unsigned line);
 void *_BOP_realloc(void* mem, size_t newsize, char *file, unsigned line);
 
-#include "dmmalloc.h"
-#include "malloc_wrapper.h"
 #define BOP_malloc( sz )	malloc( sz )
 #define BOP_alloc( n, s )	calloc( n, s )
 #define BOP_free( m )		free ( m )

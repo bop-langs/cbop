@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <semaphore.h> //BOP_msg locking
 #include <fcntl.h>
@@ -19,6 +20,7 @@
 #include "bop_ports.h"
 #include "bop_ppr_sync.h"
 #include "utils.h"
+#include "noomr_hooks.h"
 
 #define OWN_GROUP() if (setpgid(0, 0) != 0) {    perror("setpgid");     exit(-1);  }
 
@@ -450,17 +452,18 @@ void MonitorInteruptFwd(int signo){
 }
 void print_backtrace(void){
   bop_msg(1, "\nBACKTRACE pid = %d parent pid %d", getpid(), getppid());
-  void *bt[1024];
+#define BUFFER_SIZE 250
+  void *bt[BUFFER_SIZE];
   int bt_size;
   char **bt_syms;
   int i;
 
-  bt_size = backtrace(bt, 1024);
-  bt_syms = backtrace_symbols(bt, bt_size);
-  for (i = 1; i < bt_size; i++) {
-    size_t len = strlen(bt_syms[i]);
-    bop_msg(1, "\tBT: %s", bt_syms[i], len);
-  }
+  bt_size = backtrace(bt, BUFFER_SIZE);
+  backtrace_symbols_fd(bt, bt_size, 1);
+  // for (i = 1; i < bt_size; i++) {
+  //   size_t len = strlen(bt_syms[i]);
+  //   bop_msg(1, "\tBT: %s", bt_syms[i], len);
+  // }
   bop_msg(1, "\nEND BACKTRACE");
 }
 void ErrorKillAll(int signo){
@@ -469,7 +472,6 @@ void ErrorKillAll(int signo){
   /**Horrible things are happening. Go to SEQ mode so malloc won't have issues*/
   bop_msg(1, "ERROR CAUGHT %d", signo);
   int om = bop_mode;
-  malloc_panic = true;
   print_backtrace();
   error_alert_monitor();
   signal(signo, SIG_DFL);
@@ -529,13 +531,16 @@ int report_child(pid_t child, int status){
   if(WIFEXITED(status)){
     msg = "Child %d exited with value %d";
     rval = val = WEXITSTATUS(status);
-  }
-	 //Have it return true if the signal that kill the process is either SIGABRT or SIGSEGV
-	 else if(WIFSIGNALED(status)){
+  } else if(WIFSIGNALED(status)) {
+    // Have it return true if the signal that kill the process is either SIGABRT or SIGSEGV
     msg = "Child %d was terminated by signal %d";
     val =  WTERMSIG(status);
-		if (WTERMSIG(status) == SIGABRT || WTERMSIG(status) == SIGSEGV){
+		if (WTERMSIG(status) == SIGABRT || WTERMSIG(status) == SIGSEGV || WTERMSIG(status) == SIGBUS){
 			rval = 1;
+      if (child == -monitor_group) {
+        bop_msg(1, "The first child died incorrectly! Whole program abort");
+        is_monitoring = false;
+      }
 		}
   }else if(WIFSTOPPED(status)){
     msg = "Child %d was stopped by signal %d";
@@ -546,10 +551,6 @@ int report_child(pid_t child, int status){
     msg = "Child %d exit unkown status = %d";
     val = status;
   }
-  // if(child == -monitor_group){
-  //   //edge case: first child is dead, monitor wind down
-  //   is_monitoring = false;
-  // }
   if(val != -1)
     bop_msg(1, msg, child, val);
   else
@@ -594,6 +595,7 @@ static void wait_process() {
   unblock_wait();
   if(errno && errno != ECHILD){
     perror("Error in wait_process. errno != ECHILD. Monitor process endings");
+    noomr_teardown();
     _exit(EXIT_FAILURE);
   }
   my_exit = my_exit || errored;
@@ -602,6 +604,7 @@ static void wait_process() {
   msg_destroy();
   kill(monitor_group, SIGKILL); //ensure that everything is killed.
   //Once the monitor process is done, everything should have already terminated
+  noomr_teardown();
   _exit(my_exit);
 }
 int block_signal(int signo){
