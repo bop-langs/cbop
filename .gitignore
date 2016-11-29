@@ -2,3 +2,4 @@ wrapper_test
 malloc_test
 *.o
 inst.a
+.nfs*

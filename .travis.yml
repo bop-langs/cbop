@@ -11,12 +11,20 @@ env:
 matrix:
   fast_finish: true
 
+
 sudo: false
 addons:
   apt:
     packages:
     - gcc
     - clang
+
+git:
+  submodules: false
+
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
 
 script:
   - make && make test

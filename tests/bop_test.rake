@@ -4,12 +4,12 @@ require 'pathname'
 # Compiler config
 $cc = ENV['CC'] || 'gcc'
 $cc = 'gcc' if $cc == 'cc'
-$c_flags = '-g3 -fPIC -pg' if $c_flags.nil?
+$c_flags = '-g3 -ggdb3 -fPIC -pg -O0 -I./noomr/' if $c_flags.nil?
 #This is a horrible hack...maybe change this? Makes it work on OSX (eventually)
 if RUBY_PLATFORM =~ /darwin/ then
-	$ldflags = '-lm -Wl --no-as-needed -ldl -pthread'
+	$ldflags = '-lm -Wl --no-as-needed -ldl -static -pthread -rdynamic -g3'
 else
-	$ldflags = '-lm -Wl,--no-as-needed -ldl -pthread'
+	$ldflags = '-lm -Wl,--no-as-needed -ldl -static -pthread -rdynamic -g3'
 end
 
 
@@ -19,9 +19,10 @@ $params = '' if $params.nil?
 #$bop_dir = (Pathname.new(__FILE__).dirname + '../build/bop/').cleanpath if $bop_dir.nil?
 $bop_src = (Pathname.new(__FILE__).dirname + '../').cleanpath if $bop_src.nil?
 $bop_dir = $bop_src
-$bop_lib = $bop_dir + "inst.a" if $bop_lib.nil?
+$bop_lib = $bop_dir + "inst.a"  if $bop_lib.nil?
+$noomr_dir = $bop_dir + "./noomr/"
+$noomr_lib = $noomr_dir + "libnoomr.a"
 
-$incl = "../bop/build"
 $incl = $bop_src
 # Objects and programs for clean and realclean
 $objs = [] if $objs.nil?
@@ -61,7 +62,7 @@ def bop_test(name, sources = nil, orig = true)
 
     Rake::Task[:orig].enhance([orig_prog])
     file orig_prog => objs do
-      sh "#{$cc} -I#{$incl} -o #{orig_prog} #{objs * ' '}  #{$ldflags} "
+      sh "#{$cc} -rdynamic -I#{$incl} -I#{$noomr_dir} -o #{orig_prog} #{objs * ' '} #{$bop_lib} #{$noomr_lib}  #{$ldflags} "
     end
   end
 
@@ -73,7 +74,7 @@ def bop_test(name, sources = nil, orig = true)
 
   Rake::Task[:bop].enhance([bop_prog])
   file bop_prog => bop_objs + [:boplib] do
-    sh "#{$cc} -I#{$incl} -o #{bop_prog} #{bop_objs * ' '} #{$bop_lib} #{$ldflags} "
+    sh "#{$cc} -rdynamic -I#{$incl} -I#{$noomr_dir} -o #{bop_prog} #{bop_objs * ' '} #{$bop_lib} #{$noomr_lib} #{$ldflags} "
   end
 end
 
@@ -125,7 +126,7 @@ bop_o = /^(.*\/)?(bop_)?(.*?)\.o$/
 # \3 = name of file (without extension)
 rule( bop_o => proc {|n| n.sub(bop_o, '\1\3.c')} ) do |t|
   bop_flags = /bop_/ =~ t.name ? '-DBOP' : ''
-  sh "#{$cc} #{bop_flags} #{$c_flags} -I#{$bop_dir} -I#{$incl} -c -o #{t.name} #{t.source}"
+  sh "#{$cc} #{bop_flags} #{$c_flags} -I#{$bop_dir} -I#{$incl} -I#{$noomr_dir} -c -o #{t.name} #{t.source}"
 end
 task :run do
   run()
