@@ -2,11 +2,12 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdbool.h>
 #include "bop_api.h"
 #include "bop_ports.h"
 #include "utils.h"
 #include "external/malloc.h"
-#include <unistd.h>
 
 
 static mspace io_mspace = NULL;
