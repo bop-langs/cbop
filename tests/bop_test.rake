@@ -7,9 +7,9 @@ $cc = 'gcc' if $cc == 'cc'
 $c_flags = '-g3 -ggdb3 -fPIC -pg -O0 -I./noomr/' if $c_flags.nil?
 #This is a horrible hack...maybe change this? Makes it work on OSX (eventually)
 if RUBY_PLATFORM =~ /darwin/ then
-	$ldflags = '-lm -Wl --no-as-needed -ldl -static -pthread -rdynamic -g3'
+	$ldflags = '-fPIC -lm -Wl --no-as-needed -ldl -static -pthread -rdynamic -g3'
 else
-	$ldflags = '-lm -Wl,--no-as-needed -ldl -static -pthread -rdynamic -g3'
+	$ldflags = '-fPIC -lm -Wl,--no-as-needed -ldl -static -pthread -rdynamic -g3'
 end
 
 

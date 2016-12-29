@@ -762,6 +762,7 @@ char* status_name(){
     return "UNKOWN";
   }
 }
+#include "noomr.h"
 static void BOP_fini(void) {
   bop_msg(3, "An exit is reached in %s mode", status_name());
   switch (task_status) {
@@ -816,6 +817,7 @@ static void BOP_fini(void) {
     bop_msg(3, "Terminal process %d exiting with value %d", getpid(), exitv);
     bop_terminal_to_monitor();
     // dm_print_info();
+    print_noomr_stats();
     if(exitv)
       _exit(exitv);
     //don't need to call normal exit,
