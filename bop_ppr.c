@@ -596,7 +596,10 @@ static void wait_process() {
   bop_msg(1, "Monitoring process %d ending with exit value %d", getpid(), my_exit);
   msg_destroy();
   kill(monitor_group, SIGKILL); //ensure that everything is killed.
-  //Once the monitor process is done, everything should have already terminated
+  //Once the monitor process is done, everything should have already terminated_
+  if (BOP_get_verbose() >= 3) {
+    print_noomr_stats();
+  }
   noomr_teardown();
   _exit(my_exit);
 }
@@ -817,7 +820,6 @@ static void BOP_fini(void) {
     bop_msg(3, "Terminal process %d exiting with value %d", getpid(), exitv);
     bop_terminal_to_monitor();
     // dm_print_info();
-    print_noomr_stats();
     if(exitv)
       _exit(exitv);
     //don't need to call normal exit,

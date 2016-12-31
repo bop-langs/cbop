@@ -3,3 +3,4 @@ malloc_test
 *.o
 inst.a
 .nfs*
+*.d

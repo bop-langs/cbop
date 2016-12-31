@@ -13,9 +13,11 @@ endif
 NOOMR_LIB = noomr/libnoomr.a
 _NOOMR_SRC = $(wildcard noomr/*.c)
 NOOMR_OBJS = $(_NOOMR_SRC:.c=.o)
-OBJS = noomr_hooks.o $(NOOMR_LIB) ary_bitmap.o postwait.o bop_merge.o \
+COBJS = noomr_hooks.o ary_bitmap.o postwait.o bop_merge.o \
 				range_tree/dtree.o bop_ppr.o utils.o external/malloc.o \
-				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o $(NOOMR_OBJS)
+				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o
+
+OBJS = $(COBJS) $(NOOMR_LIB) $(NOOMR_OBJS)
 
 
 CFLAGS_DEF = -Wall -g -fPIC -pthread -I. -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS) -I./noomr -march=native
@@ -24,7 +26,7 @@ LDFLAGS = -Wl,--no-as-needed -ldl -static -rdynamic
 OPITIMIZEFLAGS = -O0
 DEBUG_FLAGS = -ggdb3 -g3 -pg -D CHECK_COUNTS -U NDEBUG
 LIB = inst.a
-
+DEPS = $(COBJS:.o=.d)
 LIB_SO = inst.a
 
 DEBUG ?= 1
@@ -37,6 +39,12 @@ endif
 TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2
 
 library: print_info $(LIB_SO) # $(HEADERS)
+
+
+%.d: %.c
+	@echo "Creating dependency $@"
+	@$(CC) $(CFLAGS) -MM -o $@ $?
+-include $(DEPS)
 
 
 noomr/libnoomr.a:
@@ -64,17 +72,14 @@ $(LIB_SO): $(OBJS)
 	ar r $(LIB_SO) $(OBJS)
 	@ranlib $(LIB_SO)
 
-all: $(OBJS)
+all: $(COBJS)
 
 %.o: %.c
-	@echo compiling $^
-	@$(CC) -rdynamic -c -o $@ $^ $(CFLAGS)
-
-$(BUILD_DIR)/%.h: %.h
-	@cp  $^ $@
+	@echo compiling $<
+	@$(CC) -rdynamic -c -o $@ $< $(CFLAGS)
 
 clean:
-	rm -f $(OBJS) $(LIB_SO)
+	rm -f $(OBJS) $(LIB_SO) $(DEPS)
 	$(MAKE) -C noomr clean
 	for dir in $(TEST_DIRS) ; do \
 		echo $$dir ; \
