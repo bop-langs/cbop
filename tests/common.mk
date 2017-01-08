@@ -1,5 +1,5 @@
 LIBRARY = $(realpath ../inst.a)
-LDFLAGS = -lm -Wl,--no-as-needed -ldl -pthread -rdynamic
+LDFLAGS = -lm -Wl,--no-as-needed -ldl -pthread -rdynamic -fPIC
 
 define PROGRAM_template =
 	OBJECTS += $(1)_bop.o $(1)_orig.o
@@ -34,8 +34,8 @@ clean:
 
 %_orig: %_orig.o $(LIBRARY)
 	@echo Linking original test binary $@
-	@$(CC) $(CFLAGS) -o $@ $?  $(ABS_LIB) $(LDFLAGS)
+	@$(CC) $(CFLAGS) -o $@ $? $(ABS_LIB) $(LDFLAGS)
 
 %_bop: %_bop.o
 	@echo Linking bop test binary $@
-	@$(CC) $(CFLAGS) -DBOP -o $@ $? $(ABS_LIB) $(NOOMR_LIB) $(LDFLAGS)
+	@$(CC) $(CFLAGS) -DBOP -o $@ $? $(ABS_LIB) $(LDFLAGS)

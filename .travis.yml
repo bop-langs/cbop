@@ -1,26 +1,28 @@
+dist: trusty
+sudo: required
+
 language: c
+
+cache:
+  apt: true
+
 compiler:
-  - gcc
-  - clang
-os:
-  - linux
-  #- osx
-env:
-  - BOP_GroupSize=2
-  - BOP_GroupSize=4
-matrix:
-  fast_finish: true
-
-
-sudo: false
-addons:
-  apt:
-    packages:
-    - gcc
-    - clang
+  - gcc-5
+  - clang-3.8
 
 git:
   submodules: false
+
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    # install toolchains
+    - gcc-5
+    - clang-3.8
 
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules

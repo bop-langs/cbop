@@ -1,23 +1,14 @@
-CC ?= gcc
-ifeq ($(CC), cc)
-  CC = gcc
+ifneq ($(TRAVIS_CI), 1)
+	CC = gcc
 endif
 
-CI ?= false
-ifeq ($(CI), true)
-  CI_FLAGS = -D CI_BUILD
-else
-  CI_FLAGS = -U CI_BUILD
-endif
-
-NOOMR_LIB = $(realpath noomr/libnoomr.a)
+NOOMR_LIB = noomr/libnoomr.a
+ABS_NOOMR_LIB = $(realpath $(NOOMR_LIB))
 NOOMR_SRC = $(wildcard noomr/*.c)
 NOOMR_OBJS = $(NOOMR_SRC:.c=.o)
 OBJS =  $(NOOMR_LIB) noomr_hooks.o ary_bitmap.o postwait.o bop_merge.o \
 				range_tree/dtree.o bop_ppr.o utils.o external/malloc.o \
-				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o \
-				$(NOOMR_OBJS)
-
+				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o
 INCFLAGS = -I$(realpath ./noomr) -I$(realpath .)
 CFLAGS_DEF = -Wall -g -fPIC -pthread -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS) $(INCFLAGS) -march=native
 CUSTOMDEF = -D USE_DL_PREFIX -D USE_LOCKS -D UNSUPPORTED_MALLOC
@@ -54,9 +45,9 @@ print_info:
 	@echo OBJS = $(OBJS)
 	@echo NOOMR_OBJS = $(NOOMR_OBJS)
 
-$(LIB_SO): $(OBJS) $(NOOMR_LIB)
+$(LIB_SO): $(OBJS) noomr/libnoomr.a
 	@echo building archive "$(LIB_SO)"
-	ar r $(LIB_SO) $(OBJS) $(NOOMR_LIB)
+	ar r $(LIB_SO) $(OBJS)  $(NOOMR_OBJS)
 	@ranlib $(LIB_SO)
 
 all: $(OBJS)
