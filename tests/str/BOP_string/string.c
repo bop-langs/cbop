@@ -84,13 +84,12 @@ int BOP_strcmp2(BOP_string *bs1, BOP_string *bs2) {
 /* Compare bs1 and bs2, returning less than, equal to or
    greater than zero if bs1 is lexicographically less than,
    equal to or greater than bs2.  */
-int BOP_strcmp(char* p1, char* p2) {
+int BOP_strcmp(unsigned char* p1, unsigned char* p2) {
 
 	register const unsigned char *s1 = (const unsigned char *) p1;
 	register const unsigned char *s2 = (const unsigned char *) p2;
 	unsigned register char c1, c2;
 
-	int equal = 1;
 	int ret;
 	int visited = 0;
 	long int ub = 0;
@@ -119,7 +118,7 @@ int BOP_strcmp(char* p1, char* p2) {
                                 visited = 1;
                         }
 
-		bop_msg(1,"Distance from base pointer: %d",(long int) s1 - (long int) p1);
+		bop_msg(1,"Distance from base pointer: %lu",(long int) s1 - (long int) p1);
 		BOP_ppr_end(1);
 	        read(visited);
 		if (visited) {
@@ -166,10 +165,10 @@ int main(int argc, char *argv[]) {
 	char* a = read_string(argv[1]);
 	char* b = read_string(argv[2]);
 
-	bop_msg(1,"before string compare",0);
+	bop_msg(1,"before string compare");
 
 	if (argv[3][0] == 'b') {
-		printf("%d\n",BOP_strcmp(a,b));
+		printf("%d\n",BOP_strcmp((unsigned char *) a, (unsigned char *) b));
 	} else {
 		printf("%d\n",strcmp(a,b));
 	}

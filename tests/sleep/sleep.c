@@ -48,6 +48,6 @@ int main(int argc, char ** argv) {
 
   end = time(NULL);
   printf("process time: %d seconds\n", total);
-  printf("clock time: %d seconds\n", (int) end-start);
+  printf("clock time: %lu seconds\n", (int) end-start);
   return 0;
 }

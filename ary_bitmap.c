@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
-#include "external/malloc.h"
 #include "bop_api.h"
+#include "external/malloc.h"
 #include "ary_bitmap.h"
 
 /* each entry an unsigned number, 32 bits */
