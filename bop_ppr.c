@@ -21,6 +21,7 @@
 #include "bop_ppr_sync.h"
 #include "utils.h"
 #include "noomr_hooks.h"
+#include "noomr.h"
 
 #define OWN_GROUP() if (setpgid(0, 0) != 0) {    perror("setpgid");     exit(-1);  }
 
@@ -448,15 +449,9 @@ void print_backtrace(void){
 #define BUFFER_SIZE 250
   void *bt[BUFFER_SIZE];
   int bt_size;
-  char **bt_syms;
-  int i;
 
   bt_size = backtrace(bt, BUFFER_SIZE);
   backtrace_symbols_fd(bt, bt_size, 1);
-  // for (i = 1; i < bt_size; i++) {
-  //   size_t len = strlen(bt_syms[i]);
-  //   bop_msg(1, "\tBT: %s", bt_syms[i], len);
-  // }
   bop_msg(1, "\nEND BACKTRACE");
 }
 void ErrorKillAll(int signo){

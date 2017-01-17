@@ -4,3 +4,4 @@ malloc_test
 inst.a
 .nfs*
 *.d
+**/gmon.out

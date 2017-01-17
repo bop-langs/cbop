@@ -9,6 +9,7 @@
 //6/20/2011
 //parallel string subsitution
 
+extern int min(int, int);
 int avg_subs = 3;
 int blocks = 2;
 int step_size = 10000000;
@@ -148,7 +149,6 @@ char* BOP_strsub(char* orig_begin, char* sub_begin, char* replace_begin) {
 
 	int count = 0;
 	int i,j,ii;
-	int block_size = orig_len/blocks;
 
 	for (ii=0;ii<orig_len;ii+=step_size) {
 		BOP_ppr_begin(1);

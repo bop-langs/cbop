@@ -61,6 +61,10 @@ typedef struct _mem_range_t {
 #define TOLABEL(x) TOL(x)
 #define TOS(x) #x
 #define TOSTRING(x) TOS(x)
+
+extern int _BOP_ppr_begin(int);
+extern void _BOP_ppr_end(int);
+
 #define BOP_ppr_begin(id) if (_BOP_ppr_begin(id)==1) goto TOLABEL(id)
 #define BOP_ppr_end(id) _BOP_ppr_end(id); TOLABEL(id):
 #define BOP_group_over(id) _BOP_group_over(id)
@@ -161,8 +165,8 @@ size_t max_ppr_request;
 
 #define BOP_ppr_begin(id)
 #define BOP_ppr_end(id)
-#define BOP_ordered_begin( )
-#define BOP_ordered_end( )
+#define BOP_ordered_begin(id)
+#define BOP_ordered_end(id)
 #define BOP_group_over(id)
 
 #define BOP_record_read( addr, size )
