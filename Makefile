@@ -18,7 +18,7 @@ DEBUG_FLAGS = -ggdb3 -g3 -pg -D CHECK_COUNTS
 LIB = inst.a
 DEPS = $(COBJS:.o=.d)
 
-LIB_SO = inst.a
+LIB_SO = libcbop.a
 ABS_LIB = $(realpath $(LIB_SO))
 
 CFLAGS = $(CFLAGS_DEF) $(DEBUG_FLAGS) $(OPITIMIZEFLAGS)
