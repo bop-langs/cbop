@@ -57,6 +57,7 @@ static void unblock_wait(void);
 
 //Semaphore msg init
 extern void msg_init();
+extern void on_main_complete( void );
 
 
 static void _ppr_group_init( void ) {
@@ -403,6 +404,7 @@ void _BOP_ppr_end(int id) {
   case SEQ:
     return;
   case MAIN:
+    on_main_complete();
     if ( bop_mode != SERIAL && spawn_undy( ) )
       return; /* UNDY */
     /* still MAIN, fall through */
