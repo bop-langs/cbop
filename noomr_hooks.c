@@ -1,6 +1,7 @@
 #include "bop_api.h"
 #include "noomr.h"
 #include "noomr_hooks.h"
+#include "noomr_sync.h"
 
 extern int monitor_process_id;
 
@@ -20,5 +21,5 @@ int getuniqueid() {
 bop_port_t bop_alloc_port = {
 	.ppr_group_init		= beginspec,
 	.task_group_commit	= endspec,
-  .undy_init = endspec,
+  .on_main_complete = promote_list
 };
