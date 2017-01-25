@@ -10,7 +10,6 @@
          Check before installing!
 */
 #include "malloc.h"
-#include "memmap.h"
 #include <bop_api.h>
 
 /*------------------------------ internal #includes ---------------------- */
@@ -223,24 +222,24 @@ unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
 
 #ifndef WIN32
 #define MUNMAP_DEFAULT(a, s)  munmap((a), (s))
-#define MMAP_PROT            (PROT_READ|PROT_WRITE|MAP_FIXED)
+#define MMAP_PROT            (PROT_READ|PROT_WRITE)
 #if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #define MAP_ANONYMOUS        MAP_ANON
 #endif /* MAP_ANON */
 #ifdef MAP_ANONYMOUS
-#define MMAP_FLAGS           (MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED)
-#define MMAP_DEFAULT(s)       mmap(claim_region((s)), (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
+#define MMAP_FLAGS           (MAP_PRIVATE|MAP_ANONYMOUS)
+#define MMAP_DEFAULT(s)       mmap(0, (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
 #else /* MAP_ANONYMOUS */
 /*
    Nearly all versions of mmap support MAP_ANONYMOUS, so the following
    is unlikely to be needed, but is supplied just in case.
 */
-#define MMAP_FLAGS           (MAP_PRIVATE|MAP_FIXED)
+#define MMAP_FLAGS           (MAP_PRIVATE)
 static int dev_zero_fd = -1; /* Cached file descriptor for /dev/zero. */
 #define MMAP_DEFAULT(s) ((dev_zero_fd < 0) ? \
            (dev_zero_fd = open("/dev/zero", O_RDWR), \
-            mmap(claim_region((s)), (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0)) : \
-            mmap(claim_region((s)), (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0))
+            mmap(0, (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0)) : \
+            mmap(0, (s), MMAP_PROT, MMAP_FLAGS, dev_zero_fd, 0))
 #endif /* MAP_ANONYMOUS */
 
 #define DIRECT_MMAP_DEFAULT(s) MMAP_DEFAULT(s)
@@ -2621,7 +2620,7 @@ static void add_segment(mstate m, char* tbase, size_t tsize, flag_t mmapped) {
 /* Get memory from system using MORECORE or MMAP */
 static void* sys_alloc(mstate m, size_t nb) {
   BOP_abort_spec( "malloc calls sys_alloc" );
-
+  
   char* tbase = CMFAIL;
   size_t tsize = 0;
   flag_t mmap_flag = 0;
@@ -4026,7 +4025,7 @@ mspace create_mspace(size_t capacity, int locked, int is_shared_mem) {
     /* added for BOP */
     if (is_shared_mem)
       tbase = (char*)(CALL_SHMMAP(tsize));
-    else
+    else 
       tbase = (char*)(CALL_MMAP(tsize));
     if (tbase != CMFAIL) {
       m = init_user_mstate(tbase, tsize);
