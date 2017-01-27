@@ -1,6 +1,8 @@
 LIBRARY = $(realpath ../inst.a)
 LDFLAGS = -lm -Wl,--no-as-needed -ldl -pthread -rdynamic -fPIC
 
+TESTS = add add_mem_test add_ppr_only big_alloc mem sleep small_alloc strcmp string strsub2 strsub
+
 define PROGRAM_template =
 	OBJECTS += $(1)_bop.o $(1)_orig.o
 	BINARIES += $(1)_bop $(1)_orig
@@ -11,17 +13,18 @@ define \n
 
 endef
 
-$(foreach prog,$(BASE),$(eval $(call PROGRAM_template,$(prog))))
+$(foreach prog,$(TESTS),$(eval $(call PROGRAM_template,$(prog))))
 
 
 
 default: $(BINARIES) $(OBJECTS)
 
 test:
-	$(foreach x,$(BASE), ls -l${\n}./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
+	./test_runner.rb $(BINARIES)
+	#$(foreach x,$(BASE), ls -l${\n}./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
 
 clean:
-	rm -f $(OBJECTS) $(BINARIES)
+	@rm -f $(OBJECTS) $(BINARIES)
 
 %_orig.o: %.c
 	@echo compiling original test object $@

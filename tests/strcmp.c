@@ -15,11 +15,11 @@
    equal to or greater than bs2.  */
 int BOP_strcmp(char* p1, char* p2) {
 
-	register const unsigned char *s1 = (const unsigned char *) p1;
-	register const unsigned char *s2 = (const unsigned char *) p2;
+	register const char *s1 = p1;
+	register const char *s2 = p2;
 	unsigned register char c1, c2;
 
-	int equal = 1;
+	//int equal = 1;
 	int ret;
 	int done = 0;
 	long int ub = 0;
@@ -27,7 +27,7 @@ int BOP_strcmp(char* p1, char* p2) {
 	do {
 		s1 = p1 + ub;
 		s2 = p2 + ub;
-		unsigned const register char* itr = s1 + STEP;
+		register const char *itr = s1 + STEP;
 		BOP_ppr_begin(1);
 			do {
 				c1 = (unsigned char) *s1++;
@@ -39,7 +39,7 @@ int BOP_strcmp(char* p1, char* p2) {
                                 ret = ((c1) - (c2));
                                 done = 1;
                         }
-		bop_msg(1,"Distance from base pointer: %d",(long int) s1 - (long int) p1);
+		bop_msg(1,"Distance from base pointer: %ld",(long int) s1 - (long int) p1);
 		BOP_ppr_end(1);
 
 		ub += STEP;
@@ -76,16 +76,21 @@ char* read_string(char* file_name) {
 
 /* test the functions defined in this file */
 int main(int argc, char *argv[]) {
-	char* a = read_string(argv[1]);
-	char* b = read_string(argv[2]);
+    char *a, *b;
+    if (argc > 1) {
+    	a = read_string(argv[1]);
+    } else {
+        a = "one.txt";
+    }
+    if (argc > 2) {
+    	b = read_string(argv[2]);
+    } else {
+        b = "two.txt";
+    }
 
-	bop_msg(1,"before string compare",0);
+	bop_msg(1, "before string compare");
 
-	if (argv[3][0] == 'b') {
-		printf("Compaing...\n");
-		printf("The Result: %d\n",BOP_strcmp(a,b));
-	} else {
-		printf("%d\n",strcmp(a,b));
-	}
+	printf("Compaing...\n");
+	printf("The Result: %d\n", BOP_strcmp(a,b));
 	return 0;
 }

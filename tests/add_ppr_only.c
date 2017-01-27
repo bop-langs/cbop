@@ -21,20 +21,21 @@ int main(int argc, char ** argv)
 
   /* processing the input */
   if (argc>3 || argc<2) {
-    printf("Usage: %s array_size-in-millions num-blocks\n", argv[0]);
-    exit(1);
+    data_size = 20000000;
+    num_blocks = 2;
+  } else {
+    data_size = (int) (atof(argv[1])*1000000);
+    assert(data_size>0);
+    num_blocks = atoi(argv[2]);
+    assert(num_blocks>0);
   }
-  data_size = (int) (atof(argv[1])*1000000);
-  assert(data_size>0);
-  num_blocks = atoi(argv[2]);
-  assert(num_blocks>0);
+  double *sums = (double *) malloc( num_blocks * sizeof(double) );
 
   initialize(data_size );
 
   printf("%d: adding %d million numbers\n", getpid(), data_size/1000000);
-
   block_size = ceil( (float) data_size / num_blocks );
-
+  int index = 0;
   while ( data_size > 0 ) {
     int block_end = data_size;
     data_size -= block_size;
@@ -44,18 +45,17 @@ int main(int argc, char ** argv)
 
        double block_sum = lots_of_computation_on_block( block_begin, block_end );
 
-      BOP_ordered_begin( 1 );
+       sums[ index ] = block_sum;
 
-          BOP_use( &sum, sizeof( double) );
-
-          sum += block_sum;
-
-          BOP_promise( &sum, sizeof( double ) );
-
-      BOP_ordered_end( 1 );
+       BOP_promise( &sums[ index ], sizeof( double ) );
 
     BOP_ppr_end(1);  /* End PPR */
+    index ++;
   }
+
+  int i;
+  for ( i = 0; i < index; i ++ )
+    sum += sums[ i ];
 
   printf("%d: The sum is %.0f million (%.0f) \n", getpid(), sum/1000000, sum);
   return 0;

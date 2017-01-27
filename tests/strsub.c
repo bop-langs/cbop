@@ -29,7 +29,7 @@ char* strsub_original(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*orig) {
 				orig_set = true;
 			} else {
-				*orig++;
+				//*orig++;
 				orig_len++;
 			}
 		}
@@ -37,7 +37,7 @@ char* strsub_original(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*replace) {
 				replace_set = true;
 			} else {
-				*replace++;
+				//*replace++;
 				replace_len++;
 			}
 		}
@@ -45,7 +45,7 @@ char* strsub_original(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*sub) {
 				sub_set = true;
 			} else {
-				*sub++;
+				//*sub++;
 				sub_len++;
 			}
 		}
@@ -117,7 +117,7 @@ char* BOP_strsub(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*orig) {
 				orig_set = true;
 			} else {
-				*orig++;
+				//*orig++;
 				orig_len++;
 			}
 		}
@@ -125,7 +125,7 @@ char* BOP_strsub(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*replace) {
 				replace_set = true;
 			} else {
-				*replace++;
+				//*replace++;
 				replace_len++;
 			}
 		}
@@ -133,7 +133,7 @@ char* BOP_strsub(char* orig_begin, char* sub_begin, char* replace_begin) {
 			if (!*sub) {
 				sub_set = true;
 			} else {
-				*sub++;
+				//*sub++;
 				sub_len++;
 			}
 		}
@@ -246,7 +246,12 @@ int main(int argc, char *argv[]) {
 	printf("%s\n",BOP_strsub("a man a plan a canal panama","an","qqqqqq"));
 
 	/* open file for reading */
-	FILE* fStream = fopen(argv[1], "r");
+	FILE* fStream;
+    if (argc > 1) {
+        fStream = fopen(argv[1], "r");
+    } else {
+        fStream = fopen("one.txt", "r");
+    }
 	if(fStream == NULL){fputs("File open error\n",stderr); exit(1);}
 
 	/* get file size */

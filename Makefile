@@ -23,8 +23,6 @@ ABS_LIB = $(realpath $(LIB_SO))
 
 CFLAGS = $(CFLAGS_DEF) $(DEBUG_FLAGS) $(OPITIMIZEFLAGS)
 
-TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2
-
 library: print_info $(LIB_SO)
 
 %.d: %.c
@@ -65,15 +63,15 @@ define \n
 endef
 
 tests: $(LIB_SO)
-	$(foreach x,$(TEST_DIRS), @$(MAKE) -C tests/$(x)${\n})
+	@$(MAKE) -C tests
 
 test: tests
-	$(foreach x,$(TEST_DIRS), @$(MAKE) -C tests/$(x) test ${\n})
+	@$(MAKE) -C tests/ test
 
 clean:
 	@rm -f $(OBJS) $(LIB_SO)
 	$(MAKE) -C noomr clean
-	$(foreach x,$(TEST_DIRS), @$(MAKE) -C tests/$(x) clean ${\n})
+	@$(MAKE) -C tests/ clean
 
 clobber: clean
 	@rm -f $(DEPS)

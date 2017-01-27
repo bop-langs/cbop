@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 
 /* The program makes an array of randomly initialized integers and adds them together. */
 
@@ -23,13 +24,14 @@ int main(int argc, char ** argv)
 
   /* processing the input */
   if (argc>3 || argc<2) {
-    printf("Usage: %s array_size num-blocks\n", argv[0]);
-    exit(1);
+    data_size = 20000000;
+    num_blocks = 2;
+  } else {
+    data_size = (int) (atof(argv[1])*1000000);
+    assert(data_size>0);
+    num_blocks = atoi(argv[2]);
+    assert(num_blocks>0);
   }
-  data_size = (int) (atof(argv[1]));
-  assert(data_size>0);
-  num_blocks = atoi(argv[2]);
-  assert(num_blocks>0);
   dest = (int*) malloc(sizeof(int)*data_size);
   int size = data_size;
 
@@ -53,9 +55,9 @@ int main(int argc, char ** argv)
   }
 
 	for (i=0; i < size; i++) {
+		/*
 		int diff = 1;
 
-		/*
 		if ( dest[i] != i ) {
 			printf("diff: %d; dest[i]: %d; i: %d \n", diff, dest[i], i);
 		}

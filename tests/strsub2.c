@@ -269,7 +269,12 @@ char* read_string(char* file_name) {
 
 /* test the functions defined in this file */
 int main(int argc, char *argv[]) {
-	char* a = read_string(argv[1]);
+	char* a;
+    if (argc > 1) {
+        a = read_string(argv[1]);
+    } else {
+        a = read_string("one.txt");
+    }
 
 	BOP_string* a2 = BOP_create_string(a);
 

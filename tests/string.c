@@ -162,15 +162,20 @@ char* read_string(char* file_name) {
 
 /* test the functions defined in this file */
 int main(int argc, char *argv[]) {
-	char* a = read_string(argv[1]);
-	char* b = read_string(argv[2]);
+    char *a, *b;
+    if (argc > 1) {
+    	a = read_string(argv[1]);
+    } else {
+        a = "one.txt";
+    }
+    if (argc > 2) {
+    	b = read_string(argv[2]);
+    } else {
+        b = "two.txt";
+    }
 
 	bop_msg(1,"before string compare");
 
-	if (argv[3][0] == 'b') {
-		printf("%d\n",BOP_strcmp((unsigned char *) a, (unsigned char *) b));
-	} else {
-		printf("%d\n",strcmp(a,b));
-	}
-  return 0;
+	printf("%d\n",BOP_strcmp((unsigned char *) a, (unsigned char *) b));
+    return 0;
 }
