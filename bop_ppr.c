@@ -703,7 +703,6 @@ void __attribute__ ((constructor)) BOP_init(void) {
       break;
     default:
       monitor_group = -fd; //child will set up its monitor_group variable
-      OWN_GROUP(); //monitoring process gets its own group, useful for ruby test suite
 
       bop_msg(1, "Child proc id: %d pgrd %d", getpid(), getpgrp() );
       //forward SIGINT to children/monitor group
