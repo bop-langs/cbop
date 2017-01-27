@@ -18,7 +18,7 @@ $(foreach prog,$(BASE),$(eval $(call PROGRAM_template,$(prog))))
 default: $(BINARIES) $(OBJECTS)
 
 test:
-	$(foreach x,$(BASE), ./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
+	$(foreach x,$(BASE), ls -l${\n}./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
 
 clean:
 	rm -f $(OBJECTS) $(BINARIES)
