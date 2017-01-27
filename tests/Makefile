@@ -15,7 +15,7 @@ endef
 
 $(foreach prog,$(TESTS),$(eval $(call PROGRAM_template,$(prog))))
 
-
+$(info BINARIES ${BINARIES})
 
 default: $(BINARIES) $(OBJECTS)
 
