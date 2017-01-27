@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-
+#include <unistd.h>
 /* The program makes an array of randomly initialized integers and adds them together. */
 
-#include "../../bop/bop_api.h"
+#include "bop_api.h"
 
 double * data;
 double sum;
@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
 
 
 void initialize( int data_size ) {
-  int i, _s;
+  int i;
 
   /* initialization */
   printf("%d: initializing %d million numbers\n", getpid(), data_size/1000000);

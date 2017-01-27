@@ -67,6 +67,7 @@ extern void _BOP_ppr_end(int);
 
 #define BOP_ppr_begin(id) if (_BOP_ppr_begin(id)==1) goto TOLABEL(id)
 #define BOP_ppr_end(id) _BOP_ppr_end(id); TOLABEL(id):
+extern void _BOP_group_over(int);
 #define BOP_group_over(id) _BOP_group_over(id)
 
 void BOP_ordered_begin( addr_t );

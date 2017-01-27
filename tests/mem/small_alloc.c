@@ -2,17 +2,12 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 
 /* The program makes an array of randomly initialized integers and adds them together. */
 
-#include "dmmalloc.h"
 #include "bop_api.h"
 
-#ifdef BOP
-unsigned int max_ppr = DM_MAX_REQ;
-#else
-unsigned int max_ppr = 1 << 20;
-#endif
 #define num_arrays 5
 
 int set(int ind){
@@ -21,11 +16,10 @@ int set(int ind){
 
 int main(int argc, char ** argv)
 {
-  unsigned int alloc_size = max_ppr - 100;
-  bop_debug("dm max size is %u", max_ppr);
+  unsigned int alloc_size = sizeof(int);
   bop_debug("Allocation size for test %u", alloc_size);
 
-  int * some_arrays[num_arrays] = {NULL, NULL, NULL, NULL, NULL};
+  int * some_arrays[num_arrays] = {0};
   void * raw;
   int ind = 0;
   for(ind = 0; ind < num_arrays; ind++){

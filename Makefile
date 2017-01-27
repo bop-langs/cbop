@@ -23,7 +23,7 @@ ABS_LIB = $(realpath $(LIB_SO))
 
 CFLAGS = $(CFLAGS_DEF) $(DEBUG_FLAGS) $(OPITIMIZEFLAGS)
 
-TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2
+TEST_DIRS = add sleep str/BOP_string str/strsub str/strsub2 mem
 
 library: print_info $(LIB_SO)
 

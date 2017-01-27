@@ -15,7 +15,10 @@ $(foreach prog,$(BASE),$(eval $(call PROGRAM_template,$(prog))))
 
 
 
-default: $(BINARIES) $(OBJECTS)
+default: $(ABS_LIB) $(BINARIES) $(OBJECTS)
+
+$(ABS_LIB):
+	$(MAKE) -C $(dir ABS_LIB)
 
 test:
 	$(foreach x,$(BASE), ./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
