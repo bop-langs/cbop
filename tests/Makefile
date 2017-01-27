@@ -20,6 +20,8 @@ $(foreach prog,$(TESTS),$(eval $(call PROGRAM_template,$(prog))))
 default: $(BINARIES) $(OBJECTS)
 
 test:
+	pwd
+	ls -l
 	./test_runner.rb $(BINARIES)
 	#$(foreach x,$(BASE), ls -l${\n}./$(x)_orig $(ARGUMENTS)${\n}./$(x)_bop $(ARGUMENTS)${\n})
 
