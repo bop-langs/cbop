@@ -1,3 +1,3 @@
-[submodule "noomr"]
-	path = noomr
-	url = git@github.com:benohalloran/noomr
+[submodule "bomalloc"]
+	path = bomalloc
+	url = git@github.com:benohalloran/bomalloc.git
