@@ -7,7 +7,7 @@
 /* The program makes an array of randomly initialized integers and adds them together. */
 
 #include "bop_api.h"
-#include "noomr.h"
+#include "bomalloc.h"
 
 #define num_arrays 5
 

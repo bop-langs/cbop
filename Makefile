@@ -2,14 +2,14 @@ ifneq ($(TRAVIS_CI), 1)
 	CC = gcc
 endif
 
-NOOMR_LIB = noomr/libnoomr.a
+NOOMR_LIB = bomalloc/libbomalloc.a
 ABS_NOOMR_LIB = $(realpath $(NOOMR_LIB))
-NOOMR_SRC = $(wildcard noomr/*.c)
+NOOMR_SRC = $(wildcard bomalloc/*.c)
 NOOMR_OBJS = $(NOOMR_SRC:.c=.o)
-OBJS =  $(NOOMR_LIB) noomr_hooks.o ary_bitmap.o postwait.o bop_merge.o \
+OBJS =  $(NOOMR_LIB) bomalloc_hooks.o ary_bitmap.o postwait.o bop_merge.o \
 				range_tree/dtree.o bop_ppr.o utils.o external/malloc.o \
 				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o
-INCFLAGS = -I$(realpath ./noomr) -I$(realpath .)
+INCFLAGS = -I$(realpath ./bomalloc) -I$(realpath .)
 CFLAGS_DEF = -Wall -g -fPIC -pthread -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS) $(INCFLAGS) -march=native
 CUSTOMDEF = -D USE_DL_PREFIX -D USE_LOCKS -D UNSUPPORTED_MALLOC
 LDFLAGS = -Wl,--no-as-needed -ldl -static -rdynamic
@@ -32,10 +32,10 @@ library: print_info $(LIB_SO)
 	@$(CC) $(CFLAGS) -DBOP -MM -o $@ $?
 -include $(DEPS)
 
-noomr/libnoomr.a:
-	@$(MAKE) -C noomr libnoomr.a
+bomalloc/libbomalloc.a:
+	@$(MAKE) -C bomalloc libbomalloc.a
 
-.PHONY: noomr/libnoomr.a
+.PHONY: bomalloc/libbomalloc.a
 
 print_info:
 	@echo Build info debug build = $(DEBUG)
@@ -45,7 +45,7 @@ print_info:
 	@echo OBJS = $(OBJS)
 	@echo NOOMR_OBJS = $(NOOMR_OBJS)
 
-$(LIB_SO): $(OBJS) noomr/libnoomr.a
+$(LIB_SO): $(OBJS) bomalloc/libbomalloc.a
 	@echo building archive "$(LIB_SO)"
 	ar r $(LIB_SO) $(OBJS)  $(NOOMR_OBJS)
 	@ranlib $(LIB_SO)
@@ -72,11 +72,11 @@ test: tests
 
 clean:
 	@rm -f $(OBJS) $(LIB_SO)
-	$(MAKE) -C noomr clean
+	$(MAKE) -C bomalloc clean
 	$(foreach x,$(TEST_DIRS), @$(MAKE) -C tests/$(x) clean ${\n})
 
 clobber: clean
 	@rm -f $(DEPS)
-	@$(MAKE) -C noomr clobber
+	@$(MAKE) -C bomalloc clobber
 
 export

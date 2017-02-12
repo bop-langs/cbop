@@ -1,7 +1,7 @@
 #include "bop_api.h"
-#include "noomr.h"
-#include "noomr_hooks.h"
-#include "noomr_sync.h"
+#include "bomalloc.h"
+#include "bomalloc_hooks.h"
+#include "bomalloc_sync.h"
 
 extern int monitor_process_id;
 
