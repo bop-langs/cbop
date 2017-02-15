@@ -3,7 +3,7 @@
 require 'test/unit'
 
 def run_script(binary)
-  cmd = "#{binary} > /dev/null 2>&1"
+  cmd = "./#{binary} > /dev/null 2>&1"
   system cmd
   $?.success?
 end
