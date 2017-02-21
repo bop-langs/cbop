@@ -229,7 +229,7 @@ unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
 #endif /* MAP_ANON */
 #ifdef MAP_ANONYMOUS
 #define MMAP_FLAGS           (MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED)
-#define MMAP_DEFAULT(s)       mmap(claim_region((s)), (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
+#define MMAP_DEFAULT(s)       mmap(NULL, (s), MMAP_PROT, MMAP_FLAGS, -1, 0)
 #else /* MAP_ANONYMOUS */
 /*
    Nearly all versions of mmap support MAP_ANONYMOUS, so the following

@@ -20,8 +20,8 @@
 #include "bop_ports.h"
 #include "bop_ppr_sync.h"
 #include "utils.h"
-#include "noomr_hooks.h"
-#include "noomr.h"
+#include "bomalloc_hooks.h"
+#include "bomalloc.h"
 
 #define OWN_GROUP() if (setpgid(0, 0) != 0) {    perror("setpgid");     exit(-1);  }
 
@@ -583,7 +583,7 @@ static void wait_process() {
   unblock_wait();
   if(errno && errno != ECHILD){
     perror("Error in wait_process. errno != ECHILD. Monitor process endings");
-    noomr_teardown();
+    bomalloc_teardown();
     _exit(EXIT_FAILURE);
   }
   my_exit = my_exit || errored;
@@ -593,9 +593,9 @@ static void wait_process() {
   kill(monitor_group, SIGKILL); //ensure that everything is killed.
   //Once the monitor process is done, everything should have already terminated_
   if (BOP_get_verbose() >= 3) {
-    print_noomr_stats();
+    print_bomalloc_stats();
   }
-  noomr_teardown();
+  bomalloc_teardown();
   _exit(my_exit);
 }
 int block_signal(int signo){
@@ -760,7 +760,7 @@ char* status_name(){
     return "UNKOWN";
   }
 }
-#include "noomr.h"
+#include "bomalloc.h"
 static void BOP_fini(void) {
   bop_msg(3, "An exit is reached in %s mode", status_name());
   switch (task_status) {
