@@ -1,0 +1,3 @@
+[submodule "ipa"]
+	path = ipa
+	url = git@github.com:benohalloran/ipa

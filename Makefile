@@ -2,14 +2,14 @@ ifneq ($(TRAVIS_CI), 1)
 	CC = gcc
 endif
 
-NOOMR_LIB = bomalloc/libbomalloc.a
-ABS_NOOMR_LIB = $(realpath $(NOOMR_LIB))
-NOOMR_SRC = $(wildcard bomalloc/*.c)
-NOOMR_OBJS = $(NOOMR_SRC:.c=.o)
-OBJS =  $(NOOMR_LIB) bomalloc_hooks.o ary_bitmap.o postwait.o bop_merge.o \
+IPA_LIB = ipa/libipa.a
+ABS_IPA_LIB = $(realpath $(IPA_LIB))
+IPA_SRC = $(wildcard ipa/*.c)
+IPA_OBJS = $(IPA_SRC:.c=.o)
+OBJS =  $(IPA_LIB) ipa_hooks.o ary_bitmap.o postwait.o bop_merge.o \
 				range_tree/dtree.o bop_ppr.o utils.o external/malloc.o \
 				bop_ppr_sync.o bop_io.o bop_ports.o bop_ordered.o libc_overrides.o key_value_checks.o
-INCFLAGS = -I$(realpath ./bomalloc) -I$(realpath .)
+INCFLAGS = -I$(realpath ./ipa) -I$(realpath .)
 CFLAGS_DEF = -Wall -g -fPIC -pthread -Wno-unused-function $(PLATFORM) $(CUSTOMDEF) $(CI_FLAGS) $(INCFLAGS) -march=native
 CUSTOMDEF = -D USE_DL_PREFIX -D USE_LOCKS -D UNSUPPORTED_MALLOC
 LDFLAGS = -Wl,--no-as-needed -ldl -static -rdynamic
@@ -32,10 +32,10 @@ library: print_info $(LIB_SO)
 	@$(CC) $(CFLAGS) -DBOP -MM -o $@ $?
 -include $(DEPS)
 
-bomalloc/libbomalloc.a:
-	@$(MAKE) -C bomalloc libbomalloc.a
+ipa/libipa.a:
+	@$(MAKE) -C ipa libipa.a
 
-.PHONY: bomalloc/libbomalloc.a
+.PHONY: ipa/libipa.a
 
 print_info:
 	@echo Build info debug build = $(DEBUG)
@@ -43,11 +43,11 @@ print_info:
 	@echo CFLAGS = $(CFLAGS)
 	@echo LDFLAGS = $(LDFLAGS)
 	@echo OBJS = $(OBJS)
-	@echo NOOMR_OBJS = $(NOOMR_OBJS)
+	@echo IPA_OBJS = $(IPA_OBJS)
 
-$(LIB_SO): $(OBJS) bomalloc/libbomalloc.a
+$(LIB_SO): $(OBJS) ipa/libipa.a
 	@echo building archive "$(LIB_SO)"
-	ar r $(LIB_SO) $(OBJS)  $(NOOMR_OBJS)
+	ar r $(LIB_SO) $(OBJS)  $(IPA_OBJS)
 	@ranlib $(LIB_SO)
 
 all: $(OBJS)
@@ -72,11 +72,11 @@ test: tests
 
 clean:
 	@rm -f $(OBJS) $(LIB_SO)
-	$(MAKE) -C bomalloc clean
+	$(MAKE) -C ipa clean
 	$(foreach x,$(TEST_DIRS), @$(MAKE) -C tests/$(x) clean ${\n})
 
 clobber: clean
 	@rm -f $(DEPS)
-	@$(MAKE) -C bomalloc clobber
+	@$(MAKE) -C ipa clobber
 
 export

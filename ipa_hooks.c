@@ -1,7 +1,7 @@
 #include "bop_api.h"
-#include "bomalloc.h"
-#include "bomalloc_hooks.h"
-#include "bomalloc_sync.h"
+#include "ipa.h"
+#include "ipa_hooks.h"
+#include "ipa_sync.h"
 
 extern int monitor_process_id;
 
