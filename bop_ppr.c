@@ -20,7 +20,8 @@
 #include "bop_ports.h"
 #include "bop_ppr_sync.h"
 #include "utils.h"
-#include "noomr_hooks.h"
+#include "ipa_hooks.h"
+#include "ipa.h"
 
 #define OWN_GROUP() if (setpgid(0, 0) != 0) {    perror("setpgid");     exit(-1);  }
 
@@ -46,7 +47,6 @@ int monitor_group = 0; //the process group that PPR tasks are using
 static bool is_monitoring = false;
 static bool errored = false;
 
-void BOP_abort_spec_2(bool, const char*); //only for in this function
 static void __attribute__((noreturn)) wait_process(void);
 static void __attribute__((noreturn)) end_clean(void); //exit if children errored or call abort
 static int  cleanup_children(void); //returns the value that end_clean would call with _exit (or 0 if would have aborted)
@@ -57,6 +57,7 @@ static void unblock_wait(void);
 
 //Semaphore msg init
 extern void msg_init();
+extern void on_main_complete( void );
 
 
 static void _ppr_group_init( void ) {
@@ -204,30 +205,24 @@ void BOP_malloc_rescue(char * msg, size_t size){
   }
   _exit(0); //my sanity
 }
-void BOP_abort_spec_2(bool really_abort, const char* msg){
+void  __attribute__ ((format (printf, 1, 2))) BOP_abort_spec(const char* msg, ...){
   if (task_status == SEQ
       || task_status == UNDY || bop_mode == SERIAL)
     return;
-
+    va_list argptr;
+     va_start(argptr,msg);
   if (task_status == MAIN)  { /* non-mergeable actions have happened */
     if ( partial_group_get_size() > 1 ) {
-      bop_msg(2, "Abort main speculation because %s", msg);
+      bop_msg(2, "Abort main speculation because %s", msg, argptr);
       partial_group_set_size( 1 );
     }
   }else{
-    bop_msg(2, "Abort alt speculation because %s", msg);
+    bop_msg(2, "Abort alt speculation because %s", msg, argptr);
     partial_group_set_size( spec_order );
     signal_commit_done( );
-    if(really_abort)
-      end_clean(); //_exit(0);  /* die silently, but reap children*/
-    else
-      bop_msg(2, "WARNING: Not calling abort to preserve exit values");
+    end_clean(); //_exit(0);  /* die silently, but reap children*/
   }
 }
-void BOP_abort_spec( const char *msg ) {
-  BOP_abort_spec_2(true, msg); //original behavior
-}
-
 void BOP_abort_next_spec( char *msg ) {
   if (task_status == SEQ
       || task_status == UNDY || bop_mode == SERIAL)
@@ -409,6 +404,7 @@ void _BOP_ppr_end(int id) {
   case SEQ:
     return;
   case MAIN:
+    on_main_complete();
     if ( bop_mode != SERIAL && spawn_undy( ) )
       return; /* UNDY */
     /* still MAIN, fall through */
@@ -455,15 +451,9 @@ void print_backtrace(void){
 #define BUFFER_SIZE 250
   void *bt[BUFFER_SIZE];
   int bt_size;
-  char **bt_syms;
-  int i;
 
   bt_size = backtrace(bt, BUFFER_SIZE);
   backtrace_symbols_fd(bt, bt_size, 1);
-  // for (i = 1; i < bt_size; i++) {
-  //   size_t len = strlen(bt_syms[i]);
-  //   bop_msg(1, "\tBT: %s", bt_syms[i], len);
-  // }
   bop_msg(1, "\nEND BACKTRACE");
 }
 void ErrorKillAll(int signo){
@@ -595,7 +585,7 @@ static void wait_process() {
   unblock_wait();
   if(errno && errno != ECHILD){
     perror("Error in wait_process. errno != ECHILD. Monitor process endings");
-    noomr_teardown();
+    ipa_teardown();
     _exit(EXIT_FAILURE);
   }
   my_exit = my_exit || errored;
@@ -603,8 +593,11 @@ static void wait_process() {
   bop_msg(1, "Monitoring process %d ending with exit value %d", getpid(), my_exit);
   msg_destroy();
   kill(monitor_group, SIGKILL); //ensure that everything is killed.
-  //Once the monitor process is done, everything should have already terminated
-  noomr_teardown();
+  //Once the monitor process is done, everything should have already terminated_
+  if (BOP_get_verbose() >= 3) {
+    print_ipa_stats();
+  }
+  ipa_teardown();
   _exit(my_exit);
 }
 int block_signal(int signo){
@@ -710,7 +703,6 @@ void __attribute__ ((constructor)) BOP_init(void) {
       break;
     default:
       monitor_group = -fd; //child will set up its monitor_group variable
-      OWN_GROUP(); //monitoring process gets its own group, useful for ruby test suite
 
       bop_msg(1, "Child proc id: %d pgrd %d", getpid(), getpgrp() );
       //forward SIGINT to children/monitor group
@@ -769,11 +761,12 @@ char* status_name(){
     return "UNKOWN";
   }
 }
+#include "ipa.h"
 static void BOP_fini(void) {
   bop_msg(3, "An exit is reached in %s mode", status_name());
   switch (task_status) {
   case SPEC:
-    BOP_abort_spec_2(true, "SPEC reached an exit");  /* will abort */
+    BOP_abort_spec("SPEC reached an exit");  /* will abort */
     signal(SIGUSR2, SIG_IGN);
     kill(0, SIGUSR2); //send SIGUSR to spec group but not ourself-> own group
     //everything is termininating

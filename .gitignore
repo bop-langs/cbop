@@ -1,5 +1,7 @@
 wrapper_test
 malloc_test
 *.o
-inst.a
+libcbop.a
 .nfs*
+*.d
+**/gmon.out

@@ -96,6 +96,31 @@ void undy_succ_fini( void ) {
   }
 }
 
+void on_exit_ordered( void ) {
+  int i;
+  for (i = 0; i < num_ports; i ++) {
+    if (bop_ports[i]->on_exit_ordered!=NULL)
+     port_call( bop_ports[i]->on_exit_ordered );
+  }
+}
+
+void on_enter_ordered( void ) {
+  int i;
+  for (i = 0; i < num_ports; i ++) {
+    if (bop_ports[i]->on_enter_ordered!=NULL)
+     port_call( bop_ports[i]->on_enter_ordered );
+  }
+}
+
+void on_main_complete( void ) {
+  int i;
+  for (i = 0; i < num_ports; i ++) {
+    if (bop_ports[i]->on_main_complete!=NULL) {
+     port_call( bop_ports[i]->on_main_complete);
+    }
+  }
+}
+
 /* Port code gen.  See [compiler repos]/tools/scripts/codegen.rb
 
 methods = ["ppr_group_init", "ppr_task_init", "spec_check", "data_commit", "task_group_commit", "task_group_succ_fini", "undy_init", "undy_succ_fini"]

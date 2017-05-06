@@ -7,7 +7,7 @@
 
 #ifndef NDEBUG
 /* We want the task status while debugging->bop_msg **/
-#define bop_debug(x, ...) bop_msg(1, "%s:%d " x "\n" , __FILE__, __LINE__, ##__VA_ARGS__);
+#define bop_debug(x, ...) bop_msg(1, "%s:%d " x "" , __FILE__, __LINE__, ##__VA_ARGS__);
 #else
 #define bop_debug(...)
 #endif
@@ -61,8 +61,13 @@ typedef struct _mem_range_t {
 #define TOLABEL(x) TOL(x)
 #define TOS(x) #x
 #define TOSTRING(x) TOS(x)
+
+extern int _BOP_ppr_begin(int);
+extern void _BOP_ppr_end(int);
+
 #define BOP_ppr_begin(id) if (_BOP_ppr_begin(id)==1) goto TOLABEL(id)
 #define BOP_ppr_end(id) _BOP_ppr_end(id); TOLABEL(id):
+extern void _BOP_group_over(int);
 #define BOP_group_over(id) _BOP_group_over(id)
 
 void BOP_ordered_begin( addr_t );
@@ -85,7 +90,7 @@ void BOP_record_write(void* addr, size_t size);
 typedef void monitor_t (void *, size_t);
 
 /* Called by a speculation process in case of error. */
-void BOP_abort_spec( const char* msg );
+void BOP_abort_spec( const char* msg, ...) __attribute__ ((format (printf, 1, 2)));
 void BOP_abort_next_spec( char* msg );
 
 /* FILE I/O */
@@ -161,8 +166,8 @@ size_t max_ppr_request;
 
 #define BOP_ppr_begin(id)
 #define BOP_ppr_end(id)
-#define BOP_ordered_begin( )
-#define BOP_ordered_end( )
+#define BOP_ordered_begin(id)
+#define BOP_ordered_end(id)
 #define BOP_group_over(id)
 
 #define BOP_record_read( addr, size )
@@ -172,7 +177,7 @@ size_t max_ppr_request;
 
 #define bop_msg(ignored, ...) printf( __VA_ARGS__ )
 
-#define BOP_abort_spec( msg )
+#define BOP_abort_spec( msg, ... )
 #define BOP_abort_next_spec( msg )
 #define BOP_abort_spec_group( msg )
 #define bop_assert(x) assert(x)

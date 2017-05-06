@@ -202,7 +202,7 @@ BOP_string* BOP_replace(BOP_string* original, char* find, char* replace) {
 				} else if (jump_size < 0 && num_matches != 0) {
 					/* The search is performed forwards otherwise */
 					int jump = 0;
-					char current = original->string[i][0];
+					// char current = original->string[i][0];
 					int f_count = 0;
 					for (j=0;;j++) {
 						ret[j] = ret[j-jump];

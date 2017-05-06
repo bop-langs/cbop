@@ -13,6 +13,9 @@ typedef struct {
   void (*task_group_succ_fini)( void );
   void (*undy_init)( void );
   void (*undy_succ_fini)( void );
+  void (*on_enter_ordered) (void);
+  void (*on_exit_ordered) (void);
+  void (*on_main_complete) (void);
 } bop_port_t;
 
 void register_port( bop_port_t *port, char * desc );
